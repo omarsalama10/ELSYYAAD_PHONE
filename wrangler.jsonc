@@ -1,0 +1,9 @@
+// Cloudflare deploy config: serves the built PWA from dist/ as static assets.
+{
+  "name": "elsyyaad-phone",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
