@@ -5,6 +5,7 @@ import { exportBackup, importBackup } from '../db/backup'
 import { getActiveProgram, getSetting, saveProgram, SETTING } from '../db/repo'
 import { createDefaultProgram } from '../data/defaultProgram'
 import { fmtDateLong, todayISO } from '../lib/format'
+import { useOfflineState } from '../lib/offline'
 import { Banner, Button, Card, PageTitle } from '../ui/primitives'
 import { useSafe, useToast } from '../ui/Toast'
 
@@ -37,6 +38,7 @@ export function SettingsScreen() {
   const safe = useSafe()
   const toast = useToast()
   const fileRef = useRef<HTMLInputElement>(null)
+  const offline = useOfflineState()
   const lastBackupAt = useLiveQuery(() => getSetting<number>(SETTING.lastBackupAt), [])
   const counts = useLiveQuery(async () => ({ sessions: await db.sessions.count(), inbody: await db.inbody.count(), media: await db.media.count() }), [])
   const [persisted, setPersisted] = useState<boolean>()
@@ -118,6 +120,12 @@ export function SettingsScreen() {
 
       <Card className="space-y-2">
         <h2 className="font-bold">التخزين</h2>
+        <p className="text-sm" data-testid="offline-state">
+          الشغل من غير نت:{' '}
+          {offline === 'ready' ? <span className="text-accent">جاهز ✅</span>
+            : offline === 'preparing' ? <span className="text-warn">بيتجهّز… خليك متصل بالنت</span>
+            : offline === 'unsupported' ? <span className="text-danger">المتصفح ده مش بيدعمه</span> : '—'}
+        </p>
         <p className="text-sm">
           تخزين دائم: {persisted === undefined ? '—' : persisted ? <span className="text-accent">مفعّل ✅</span> : <span className="text-warn">مش مفعّل</span>}
           {usage && <span className="text-muted"> • مستخدم {usage}</span>}

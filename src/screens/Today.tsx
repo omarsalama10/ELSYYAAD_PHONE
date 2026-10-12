@@ -7,6 +7,7 @@ import { nextDayId } from '../domain/rotation'
 import { summarizeWeek } from '../domain/weekly'
 import { fmtDate, fmtDuration, fmtNum, weekStart } from '../lib/format'
 import { useExercises } from '../lib/hooks'
+import { useOfflineState } from '../lib/offline'
 import { dayCover, dayFocus, estimateMinutes } from '../lib/workout'
 import { Icon, IconX } from '../ui/icons'
 import { Banner, Button } from '../ui/primitives'
@@ -27,6 +28,7 @@ export function Today() {
   const nav = useNavigate()
   const safe = useSafe()
   const exercises = useExercises()
+  const offline = useOfflineState()
   const data = useLiveQuery(async () => {
     const [program, active, done, lastBackupAt, sets] = await Promise.all([
       getActiveProgram(), getActiveSession(), completedSessions(), getSetting<number>(SETTING.lastBackupAt), db.sets.toArray(),
@@ -73,6 +75,9 @@ export function Today() {
         <Link to="/settings" aria-label="الإعدادات" className="glass-strong flex h-11 w-11 items-center justify-center rounded-2xl text-muted"><Icon.settings /></Link>
       </header>
 
+      {offline === 'preparing' && (
+        <Banner tone="warn">⏳ التطبيق بيتجهّز للشغل من غير نت — خليك متصل بالنت لحد ما الرسالة دي تختفي.</Banner>
+      )}
       {isReturnPhase(week) && <Banner>مرحلة الرجوع: مجموعتين بس في كل تمرين، ووزن تحس إنك كنت تقدر تعمل بيه 3-4 عدات زيادة.</Banner>}
       {!isReturnPhase(week) && isDeloadWeek(week) && <Banner tone="warn">أسبوع خفيف (Deload): مجموعات أقل بنفس الأوزان عشان جسمك يستشفى ويرجع أقوى.</Banner>}
       {needsBackup && (

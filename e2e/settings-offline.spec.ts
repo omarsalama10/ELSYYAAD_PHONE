@@ -41,6 +41,11 @@ test('works offline after the service worker installs', async ({ page, context }
   await page.reload()
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true)
 
+  await page.goto('./#/settings')
+  await expect(page.getByTestId('offline-state')).toContainText('جاهز')
+  await page.goto('./')
+  await expect(page.getByText('بيتجهّز للشغل من غير نت')).toHaveCount(0)
+
   await context.setOffline(true)
   await page.reload()
   await expect(page.getByRole('button', { name: /ابدأ يوم/ })).toBeVisible()
