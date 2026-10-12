@@ -80,6 +80,10 @@ describe('food & budget', () => {
     expect(e).toMatchObject({ kcal: 143, p: 12.6, price: 12, grams: 100, name: 'بيض' })
     expect(sumMacros([e, entryFromFood(fool, 200)])).toEqual({ kcal: 363, p: 27.8, c: 40.1, f: 10.3 })
   })
+  it('ignores cheap foods that are not protein sources', () => {
+    const bread: Food = { id: 'bread', name: 'عيش', per100: { kcal: 250, p: 9, c: 51, f: 1.2 }, serving: { label: 'رغيف', grams: 90 }, custom: false, price: 1 }
+    expect(cheapestProtein([bread, egg]).map((x) => x.food.id)).toEqual(['egg'])
+  })
   it('ranks protein per pound', () => {
     expect(cheapestProtein([tuna, egg, fool]).map((x) => x.food.id)).toEqual(['fool', 'egg', 'tuna'])
   })

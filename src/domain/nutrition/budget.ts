@@ -3,10 +3,13 @@ import type { Food } from './types'
 
 export interface Ranked { food: Food; proteinPerServing: number; proteinPerEgp: number }
 
-/** Priced foods by grams of protein per pound, best first. */
+/** Only foods getting ≥20% of their energy from protein count as protein sources (bread doesn't). */
+const MIN_PROTEIN_SHARE = 0.2
+
+/** Priced protein sources by grams of protein per pound, best first. */
 export function cheapestProtein(foods: Food[]): Ranked[] {
   return foods
-    .filter((f) => f.price && f.price > 0)
+    .filter((f) => f.price && f.price > 0 && f.per100.kcal > 0 && (f.per100.p * 4) / f.per100.kcal >= MIN_PROTEIN_SHARE)
     .map((food) => {
       const p = macrosForGrams(food, food.serving.grams).p
       return { food, proteinPerServing: p, proteinPerEgp: p / food.price! }

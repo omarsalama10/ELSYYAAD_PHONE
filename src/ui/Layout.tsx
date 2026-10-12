@@ -4,9 +4,9 @@ import { Icon } from './icons'
 const TABS = [
   { to: '/', label: 'الرئيسية', icon: Icon.today, end: true },
   { to: '/workouts', label: 'التمارين', icon: Icon.program },
+  { to: '/nutrition', label: 'التغذية', icon: Icon.food },
   { to: '/progress', label: 'التقدم', icon: Icon.progress },
   { to: '/body', label: 'الجسم', icon: Icon.body },
-  { to: '/settings', label: 'الإعدادات', icon: Icon.settings },
 ]
 
 export function Layout() {

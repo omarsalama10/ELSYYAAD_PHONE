@@ -11,7 +11,7 @@ test('backup export → wipe → import restores data', async ({ page }) => {
   await page.getByLabel('الوزن', { exact: true }).fill('70.5')
   await page.getByRole('button', { name: 'حفظ' }).click()
 
-  await page.getByRole('link', { name: 'الإعدادات' }).click()
+  await page.goto('./#/settings')
   await expect(page.getByText('لسه معملتش')).toBeVisible()
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'اعمل نسخة' }).click()])
   expect(download.suggestedFilename()).toMatch(/^gymy-backup-\d{4}-\d{2}-\d{2}\.zip$/)
