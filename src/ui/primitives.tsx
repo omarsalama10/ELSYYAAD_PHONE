@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
@@ -61,6 +62,34 @@ export function NumberInput({ value, onChange, placeholder, className = '', step
         const v = e.target.value.replace(',', '.')
         onChange(v === '' ? undefined : Number(v))
       }}
+    />
+  )
+}
+
+/** Edits locally and commits on blur, so clearing the field while typing doesn't snap back. */
+export function CommitNumber({ value, onCommit, ariaLabel, min = 0 }: {
+  value: number
+  onCommit: (v: number) => void
+  ariaLabel: string
+  min?: number
+}) {
+  const [text, setText] = useState<string>()
+  const commit = () => {
+    if (text === undefined) return
+    const v = Number(text.replace(',', '.'))
+    if (text.trim() !== '' && Number.isFinite(v) && v >= min && v !== value) onCommit(v)
+    setText(undefined)
+  }
+  return (
+    <input
+      type="number"
+      inputMode="decimal"
+      aria-label={ariaLabel}
+      className="ltr w-full text-center"
+      value={text ?? String(value)}
+      onChange={(e) => setText(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
     />
   )
 }
