@@ -15,7 +15,13 @@ interface Props {
   onDone: (v: RowValues) => void
   onUndo: () => void
   onChange: (v: RowValues) => void
+  rpe?: number
+  /** Omit to hide RPE (warm-up, cardio). */
+  onRpe?: (rpe: number) => void
 }
+
+const RPE_VALUES = [6, 7, 8, 9, 10]
+const RPE_HINT: Record<number, string> = { 6: 'سهل', 7: 'كان فيه 3', 8: 'كان فيه 2', 9: 'كان فيه 1', 10: 'آخري' }
 
 /** Count-up stopwatch for timed holds; writes elapsed seconds into the row. */
 function useStopwatch(onStop: (sec: number) => void) {
@@ -39,7 +45,8 @@ function useStopwatch(onStop: (sec: number) => void) {
   return { running: !!startAt, elapsed, toggle }
 }
 
-export function SetRow({ exercise: e, index, sideLabel, log, done, prefill, onDone, onUndo, onChange }: Props) {
+export function SetRow({ exercise: e, index, sideLabel, log, done, prefill, onDone, onUndo, onChange, rpe, onRpe }: Props) {
+  const [pickRpe, setPickRpe] = useState(false)
   const [draft, setDraft] = useState<RowValues>()
   const shown: RowValues = draft ?? log ?? prefill
   const showWeight = e.increment > 0
@@ -49,8 +56,10 @@ export function SetRow({ exercise: e, index, sideLabel, log, done, prefill, onDo
   }
   const sw = useStopwatch((sec) => set({ ...shown, value: sec }))
 
+  const showRpePicker = done && onRpe && (rpe === undefined || pickRpe)
   return (
-    <div className={`flex items-center gap-2 rounded-xl px-2 py-1.5 ${done ? 'bg-accent/10' : 'bg-white/50'}`} data-testid="set-row">
+    <div className={`rounded-xl ${done ? 'bg-accent/10' : 'bg-white/50'}`}>
+    <div className="flex items-center gap-2 px-2 py-1.5" data-testid="set-row">
       <span className="w-6 text-center text-sm font-bold text-muted">{index + 1}</span>
       {sideLabel && <span className="w-9 text-xs text-muted">{sideLabel}</span>}
       {showWeight && (
@@ -88,6 +97,22 @@ export function SetRow({ exercise: e, index, sideLabel, log, done, prefill, onDo
       >
         <Icon.check />
       </button>
+      {done && onRpe && rpe !== undefined && !pickRpe && (
+        <button type="button" onClick={() => setPickRpe(true)} className="rounded-lg bg-white/80 px-1.5 py-1 text-[10px] font-semibold text-muted" aria-label={`المجهود ${rpe}`}>RPE {rpe}</button>
+      )}
+    </div>
+    {showRpePicker && (
+      <div className="flex items-center gap-1 px-2 pb-2" role="radiogroup" aria-label="المجهود (RPE)">
+        <span className="ml-1 text-[11px] text-muted">المجهود:</span>
+        {RPE_VALUES.map((v) => (
+          <button
+            key={v} type="button" role="radio" aria-checked={rpe === v} aria-label={`RPE ${v}`} title={RPE_HINT[v]}
+            onClick={() => { onRpe!(v); setPickRpe(false) }}
+            className={`h-8 flex-1 rounded-lg text-xs font-semibold ${rpe === v ? 'bg-accent text-white' : 'bg-white/80 text-muted'}`}
+          >{v}</button>
+        ))}
+      </div>
+    )}
     </div>
   )
 }

@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate, useParams } from 'react-router-dom'
 import { db } from '../db/db'
-import { deleteMedia, exerciseHistory, getMedia, putMedia } from '../db/repo'
+import { deleteMedia, exerciseHistory, getMedia, putMedia, renameExercise } from '../db/repo'
 import { bestPerSession, sideTotals } from '../domain/stats'
 import { MUSCLE_AR } from '../data/catalog'
 import { fmtDate, fmtNum, UNIT } from '../lib/format'
@@ -13,6 +13,9 @@ import { LineChart } from '../ui/LineChart'
 import { Button, Card } from '../ui/primitives'
 import { useSafe } from '../ui/Toast'
 import { fromLog } from '../lib/setValues'
+import { useCoachReport } from '../lib/coach'
+import { IconX } from '../ui/icons'
+import { AnalysisCard, recordLine } from './coach/CoachParts'
 
 const MAX_VIDEO_MB = 200
 
@@ -24,6 +27,7 @@ export function ExerciseDetail() {
   const exercise = useLiveQuery(() => db.exercises.get(id), [id])
   const media = useLiveQuery(() => getMedia(id), [id])
   const history = useLiveQuery(() => exerciseHistory(id, 50), [id])
+  const report = useCoachReport()
 
   if (exercise === undefined) return null
   if (!exercise) return <Bare><p className="pt-safe text-muted">التمرين مش موجود</p></Bare>
@@ -49,7 +53,13 @@ export function ExerciseDetail() {
       <div className="flex items-center gap-2 pb-3 pt-safe">
         <button type="button" onClick={() => nav(-1)} className="rounded-lg p-1 text-muted" aria-label="رجوع"><Icon.back /></button>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-bold">{e.nameAr}</h1>
+          <h1 className="flex items-center gap-2 text-xl font-bold">
+            <span className="truncate">{e.nameAr}</span>
+            <button
+              type="button" aria-label="تغيير الاسم" className="shrink-0 text-muted"
+              onClick={() => { const n = prompt('الاسم الجديد للتمرين', e.nameAr); if (n !== null && n.trim() !== e.nameAr) void safe(() => renameExercise(e.id, n), 'الاسم اتغيّر') }}
+            ><IconX.edit /></button>
+          </h1>
           <div className="ltr truncate text-right text-xs text-muted">{e.name}</div>
         </div>
       </div>
@@ -77,6 +87,20 @@ export function ExerciseDetail() {
             </details>
           )}
         </Card>
+
+        {(() => {
+          const r = report?.exercises.find((x) => x.exercise.id === e.id)
+          if (!r) return null
+          return (
+            <>
+              <div className="glass flex items-center gap-3 p-4" data-testid="exercise-record">
+                <span className="text-2xl">🏆</span>
+                <div><div className="text-xs text-muted">رقمك القياسي</div><div className="text-sm font-semibold">{recordLine(r)}</div></div>
+              </div>
+              <AnalysisCard analysis={r.analysis} />
+            </>
+          )
+        })()}
 
         <LineChart title={isLoaded ? 'أقصى قوة تقديرية (1RM)' : `أفضل أداء (${UNIT[e.metric]})`} unit={isLoaded ? 'كجم' : UNIT[e.metric]} series={series} />
 

@@ -11,6 +11,9 @@ import { useExercises } from '../lib/hooks'
 import { LineChart, SERIES_COLORS, SINGLE_COLOR } from '../ui/LineChart'
 import { Card, Empty, PageTitle } from '../ui/primitives'
 import { Rings, Segmented } from '../ui/viz'
+import { MuscleMap } from '../ui/MuscleMap'
+import { useCoachReport } from '../lib/coach'
+import { AchievementsGrid, AnalysisCard, Challenges, RecordsList } from './coach/CoachParts'
 
 const DAY = 86_400_000
 const WEEK = 7 * DAY
@@ -23,6 +26,12 @@ const RANGES: { value: Range; label: string }[] = [
 ]
 /** Weekly goals the rings measure against (scaled by the number of weeks in range). */
 const GOAL = { sessions: 3, sets: 75, cardio: 60 }
+type Tab = 'perf' | 'muscles' | 'awards'
+const TABS: { value: Tab; label: string }[] = [
+  { value: 'perf', label: 'الأداء' },
+  { value: 'muscles', label: 'العضلات' },
+  { value: 'awards', label: 'الإنجازات' },
+]
 
 function rangeStart(r: Range, now: number, first: number): number {
   if (r === 'week') return weekStart(now)
@@ -36,6 +45,8 @@ export function ProgressScreen() {
   const sessions = useLiveQuery(() => completedSessions(), [])
   const sets = useLiveQuery(() => db.sets.toArray(), [])
   const [range, setRange] = useState<Range>('week')
+  const [tab, setTab] = useState<Tab>('perf')
+  const report = useCoachReport()
   const trained = [...new Set((sets ?? []).map((s) => s.exerciseId))]
   const [picked, setPicked] = useState<string>()
   const exerciseId = picked ?? trained.find((id) => exercises?.get(id)?.metric === 'reps' && exercises.get(id)?.increment) ?? trained[0]
@@ -85,10 +96,14 @@ export function ProgressScreen() {
   const chrono = [...(history ?? [])].reverse()
   const loaded = ex?.metric === 'reps' && chrono.some((h) => h.sets.some((s) => s.weight))
   const unilateral = trained.map((id) => exercises.get(id)).filter((e) => e?.unilateral)
+  const selectedReport = report?.exercises.find((r) => r.exercise.id === exerciseId)
 
   return (
     <div className="space-y-4">
-      <PageTitle>التقدم</PageTitle>
+      <PageTitle action={<Link to="/history" className="glass-strong rounded-2xl px-3 py-2 text-sm text-accent">سجل التمارين</Link>}>التقدم</PageTitle>
+      <Segmented options={TABS} value={tab} onChange={setTab} />
+
+      {tab === 'perf' && (<>
       <Segmented options={RANGES} value={range} onChange={setRange} />
 
       <LineChart
@@ -126,6 +141,7 @@ export function ProgressScreen() {
         </div>
       )}
 
+      {ex && selectedReport && <AnalysisCard analysis={selectedReport.analysis} title={`تحليل المدرب: ${ex.nameAr}`} />}
       {unilateral.length > 0 && (
         <Card>
           <h2 className="mb-3 text-[15px] font-semibold">شمال مقابل يمين (آخر مرة)</h2>
@@ -133,6 +149,17 @@ export function ProgressScreen() {
         </Card>
       )}
 
+      <Card>
+        <h2 className="mb-1 text-[15px] font-semibold">الأرقام القياسية</h2>
+        {report ? <RecordsList reports={report.exercises} /> : null}
+      </Card>
+      </>)}
+
+      {tab === 'muscles' && (<>
+      <Card>
+        <h2 className="mb-2 text-[15px] font-semibold">خريطة العضلات — الأسبوع ده</h2>
+        <MuscleMap sets={thisWeek} />
+      </Card>
       <Card>
         <h2 className="text-[15px] font-semibold">مجموعات كل عضلة</h2>
         <p className="mb-3 text-xs text-muted">الهدف للتضخيم: حوالي 10-20 مجموعة للعضلة في الأسبوع.</p>
@@ -155,6 +182,23 @@ export function ProgressScreen() {
           })}
         </ul>
       </Card>
+      </>)}
+
+      {tab === 'awards' && report && (<>
+      <section className="glass flex items-center gap-4 p-5">
+        <span className="text-4xl">🔥</span>
+        <div><div className="text-2xl font-bold num">{report.streak} {report.streak === 1 ? 'أسبوع' : 'أسابيع'}</div><div className="text-xs text-muted">ورا بعض بـ 3 تمارين • {report.prCount} رقم قياسي لحد دلوقتي</div></div>
+      </section>
+      <Card>
+        <h2 className="mb-3 text-[15px] font-semibold">تحديات الأسبوع</h2>
+        <Challenges items={report.challenges} />
+      </Card>
+      <Card>
+        <h2 className="mb-3 text-[15px] font-semibold">الإنجازات</h2>
+        <AchievementsGrid items={report.achievements} />
+        <p className="mt-3 text-[11px] text-muted">الإنجازات عشان تحفّزك مش تضغط عليك — لو فيه ألم أو إصابة، الراحة أهم من أي تحدي.</p>
+      </Card>
+      </>)}
     </div>
   )
 }

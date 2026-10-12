@@ -13,6 +13,7 @@ import { Icon, IconX } from '../ui/icons'
 import { Banner, Button } from '../ui/primitives'
 import { IconWell, ProgressRing, WeekBars } from '../ui/viz'
 import { useSafe } from '../ui/Toast'
+import { CheckInCard } from './coach/CheckInCard'
 
 const BACKUP_DAYS = 14
 const DAY = 86_400_000
@@ -117,6 +118,8 @@ export function Today() {
           )}
         </div>
       </section>
+
+      <CheckInCard />
 
       {/* Weekly progress */}
       <section className="glass p-5" aria-label="تقدم الأسبوع">

@@ -41,3 +41,17 @@ export function isNewRecord(e: Exercise, prior: SetLog[], s: SetLog): { kind: Re
   if (best.value && v > best.value.value) return { kind: 'value', value: v }
   return undefined
 }
+
+/** Number of record-breaking sets across a chronological history (first session excluded). */
+export function countRecords(e: Exercise, sessionsChrono: { sets: SetLog[] }[]): number {
+  const prior: SetLog[] = []
+  let count = 0
+  for (const { sets } of sessionsChrono) {
+    for (const s of sets) {
+      if (!s.done) continue
+      if (isNewRecord(e, prior, s)) count++
+      prior.push(s)
+    }
+  }
+  return count
+}

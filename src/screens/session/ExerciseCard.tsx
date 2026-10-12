@@ -9,7 +9,9 @@ import { MUSCLE_AR } from '../../data/catalog'
 import { ExerciseDemo } from '../../ui/ExerciseDemo'
 import { Icon, IconX } from '../../ui/icons'
 import { useRest } from '../../ui/RestTimer'
-import { useSafe } from '../../ui/Toast'
+import { useSafe, useToast } from '../../ui/Toast'
+import { applyReadiness, type Adjust } from '../../domain/readiness'
+import { isNewRecord } from '../../domain/records'
 import { fromLog, toLog, type RowValues } from '../../lib/setValues'
 import { SetRow } from './SetRow'
 
@@ -26,6 +28,8 @@ interface Props {
   onToggle: () => void
   /** False for the first exercise(s) of a superset: go straight to the partner. */
   restAfter: boolean
+  /** Today's readiness adjustment, if the user checked in. */
+  adjust?: Adjust
 }
 
 function lastTimeSummary(e: Exercise, h: SessionSets | undefined): string | undefined {
@@ -40,15 +44,22 @@ function lastTimeSummary(e: Exercise, h: SessionSets | undefined): string | unde
     .join(' | ')
 }
 
-export function ExerciseCard({ sessionId, block, exercise: e, week, sets, history, open, onToggle, restAfter }: Props) {
+export function ExerciseCard({ sessionId, block, exercise: e, week, sets, history, open, onToggle, restAfter, adjust }: Props) {
   const rest = useRest()
   const safe = useSafe()
+  const toast = useToast()
   const [extra, setExtra] = useState(0)
   const planned = effectiveSets(block, week)
   const maxLogged = Math.max(-1, ...sets.map((s) => s.setIndex))
   const rows = Math.max(planned + extra, maxLogged + 1)
   const sides: (Side | undefined)[] = e.unilateral ? ['L', 'R'] : [undefined]
+  const lastWeight = (side?: Side) => {
+    const prev = history[0]?.sets.filter((x) => x.done && (side ? x.side === side : true)) ?? []
+    const w = Math.max(0, ...prev.map((x) => x.weight ?? 0))
+    return w > 0 ? w : undefined
+  }
   const suggestions = suggest({ exercise: e, block, history: history.map((h) => h.sets) })
+    .map((sg) => (adjust && block.section !== 'warmup' ? applyReadiness(sg, adjust, e, lastWeight(sg.side)) : sg))
   const sugFor = (side?: Side): Suggestion | undefined => suggestions.find((s) => s.side === side)
   const doneCount = sets.filter((s) => s.done).length
   const need = planned * sides.length
@@ -71,10 +82,17 @@ export function ExerciseCard({ sessionId, block, exercise: e, week, sets, histor
   const complete_ = (i: number, side: Side | undefined, v: RowValues) =>
     safe(async () => {
       const existing = find(i, side)
-      await upsertSet({
+      const log: SetLog = {
         id: existing?.id ?? uid(), sessionId, exerciseId: e.id, blockId: block.id, setIndex: i,
         ...(side ? { side } : {}), ...toLog(e, v), done: true, at: Date.now(),
-      })
+      }
+      await upsertSet(log)
+      const prior = [...history.flatMap((h) => h.sets), ...sets.filter((x) => x.done && x.id !== log.id)]
+      const pr = block.section === 'warmup' ? undefined : isNewRecord(e, prior, log)
+      if (pr) {
+        const what = pr.kind === 'e1rm' ? `أقصى قوة تقديرية ${fmtNum(pr.value)} كجم` : pr.kind === 'weight' ? `أتقل وزن ${fmtNum(pr.value)} كجم` : `${fmtNum(pr.value)} ${UNIT[e.metric]}`
+        toast(`🏆 رقم قياسي جديد! ${e.nameAr}: ${what}`)
+      }
       const lastSide = !side || side === 'R'
       if (restAfter && lastSide) rest.start(block.restSec)
     })
@@ -83,6 +101,12 @@ export function ExerciseCard({ sessionId, block, exercise: e, week, sets, histor
     safe(async () => {
       const existing = find(i, side)
       if (existing) await upsertSet({ ...existing, ...toLog(e, v) })
+    })
+
+  const setRpe = (i: number, side: Side | undefined, rpe: number) =>
+    safe(async () => {
+      const existing = find(i, side)
+      if (existing) await upsertSet({ ...existing, rpe })
     })
 
   const undo = (i: number, side?: Side) =>
@@ -130,6 +154,7 @@ export function ExerciseCard({ sessionId, block, exercise: e, week, sets, histor
               return s ? (
                 <div key={side ?? 'x'} className="rounded-lg bg-accent/10 px-3 py-2 text-sm text-accent" data-testid="suggestion">
                   {side ? `${SIDE_AR[side]}: ` : ''}{suggestionText(s, e)}
+                  {s.note && <span className="mt-0.5 block text-xs text-muted">ℹ️ {s.note}</span>}
                 </div>
               ) : null
             })}
@@ -150,6 +175,8 @@ export function ExerciseCard({ sessionId, block, exercise: e, week, sets, histor
                     onDone={(v) => complete_(i, side, v)}
                     onUndo={() => undo(i, side)}
                     onChange={(v) => update(i, side, v)}
+                    rpe={log?.rpe}
+                    onRpe={block.section === 'warmup' || e.metric === 'cardio' ? undefined : (r) => setRpe(i, side, r)}
                   />
                 )
               }),

@@ -104,3 +104,15 @@ describe('achievements', () => {
     expect(list.find((a) => a.id === 'inbody-1')?.unlocked).toBe(false)
   })
 })
+
+describe('countRecords', () => {
+  it('counts each set that beat everything before it', async () => {
+    const { countRecords } = await import('../../src/domain/records')
+    const sessions = [
+      { sets: [set({ weight: 50, reps: 8 })] },
+      { sets: [set({ weight: 52.5, reps: 8 }), set({ weight: 52.5, reps: 8 })] },
+      { sets: [set({ weight: 52.5, reps: 10 })] },
+    ]
+    expect(countRecords(ex(), sessions)).toBe(2)
+  })
+})

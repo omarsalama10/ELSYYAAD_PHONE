@@ -16,6 +16,7 @@ import { ProgressScreen } from './screens/Progress'
 import { SettingsScreen } from './screens/Settings'
 import { WorkoutsScreen } from './screens/Workouts'
 import { DayDetail } from './screens/DayDetail'
+import { HistoryDetail, HistoryList } from './screens/History'
 
 export default function App() {
   const [state, setState] = useState<'loading' | 'ready' | Error>('loading')
@@ -53,6 +54,8 @@ export default function App() {
             <Route path="session/:id" element={<SessionScreen />} />
             <Route path="exercises/:id" element={<ExerciseDetail />} />
             <Route path="workouts/:dayId" element={<DayDetail />} />
+            <Route path="history" element={<HistoryList />} />
+            <Route path="history/:id" element={<HistoryDetail />} />
           </Routes>
         </HashRouter>
       </RestTimerProvider>

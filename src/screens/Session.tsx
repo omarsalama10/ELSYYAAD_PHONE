@@ -14,6 +14,8 @@ import { Banner, Button } from '../ui/primitives'
 import { useRest } from '../ui/RestTimer'
 import { useSafe, useToast } from '../ui/Toast'
 import { ExerciseCard } from './session/ExerciseCard'
+import { CheckInCard } from './coach/CheckInCard'
+import { useTodayReadiness } from '../lib/readiness'
 
 type Group = { key: string; blocks: Block[] }
 
@@ -36,6 +38,7 @@ export function SessionScreen() {
   const rest = useRest()
   const now = useNow()
   useWakeLock()
+  const readiness = useTodayReadiness()
 
   const exercises = useExercises()
   const session = useLiveQuery(() => db.sessions.get(id), [id])
@@ -49,7 +52,7 @@ export function SessionScreen() {
     if (!day) return
     let cancelled = false
     const ids = [...new Set(day.blocks.map((b) => b.exerciseId))]
-    void Promise.all(ids.map(async (eid) => [eid, await exerciseHistory(eid, 3)] as const)).then((rows) => {
+    void Promise.all(ids.map(async (eid) => [eid, await exerciseHistory(eid, 200)] as const)).then((rows) => {
       if (!cancelled) setHistory(new Map(rows))
     })
     return () => { cancelled = true }
@@ -142,6 +145,7 @@ export function SessionScreen() {
 
       <div className="space-y-5 pt-4">
         {isReturnPhase(week) && <Banner>مرحلة الرجوع: مجموعتين ومجهود متوسط (تقدر تعمل 3-4 عدات زيادة).</Banner>}
+        {!finished && <CheckInCard compact />}
         {sections.map((sec) => {
           const blocks = day.blocks.filter((b) => b.section === sec)
           if (blocks.length === 0) return null
@@ -164,6 +168,7 @@ export function SessionScreen() {
                       open={open?.has(b.id) ?? false}
                       onToggle={() => toggle(b.id)}
                       restAfter={g.blocks.length === 1 || b === g.blocks.at(-1)}
+                      adjust={readiness?.advice?.adjust}
                     />
                   )
                 })
