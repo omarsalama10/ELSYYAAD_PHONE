@@ -12,7 +12,7 @@ import { Bare } from '../ui/Layout'
 import { LineChart } from '../ui/LineChart'
 import { Button, Card } from '../ui/primitives'
 import { useSafe } from '../ui/Toast'
-import { fromLog } from './session/ExerciseCard'
+import { fromLog } from '../lib/setValues'
 
 const MAX_VIDEO_MB = 200
 

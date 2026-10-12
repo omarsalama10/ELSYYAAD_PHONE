@@ -10,7 +10,8 @@ import { ExerciseDemo } from '../../ui/ExerciseDemo'
 import { Icon } from '../../ui/icons'
 import { useRest } from '../../ui/RestTimer'
 import { useSafe } from '../../ui/Toast'
-import { SetRow, type RowValues } from './SetRow'
+import { fromLog, toLog, type RowValues } from '../../lib/setValues'
+import { SetRow } from './SetRow'
 
 const SIDE_AR: Record<Side, string> = { L: 'شمال', R: 'يمين' }
 
@@ -25,21 +26,6 @@ interface Props {
   onToggle: () => void
   /** False for the first exercise(s) of a superset: go straight to the partner. */
   restAfter: boolean
-}
-
-export function toLog(e: Exercise, v: RowValues): Pick<SetLog, 'weight' | 'reps' | 'seconds' | 'meters'> {
-  const weight = e.increment > 0 ? v.weight : undefined
-  switch (e.metric) {
-    case 'reps': return { weight, reps: v.value }
-    case 'time': return { weight, seconds: v.value }
-    case 'distance': return { weight, meters: v.value }
-    case 'cardio': return { seconds: v.value !== undefined ? Math.round(v.value * 60) : undefined }
-  }
-}
-
-export function fromLog(e: Exercise, s: SetLog): RowValues {
-  const value = e.metric === 'reps' ? s.reps : e.metric === 'time' ? s.seconds : e.metric === 'distance' ? s.meters : s.seconds !== undefined ? s.seconds / 60 : undefined
-  return { weight: s.weight, value }
 }
 
 function lastTimeSummary(e: Exercise, h: SessionSets | undefined): string | undefined {

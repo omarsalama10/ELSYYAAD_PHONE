@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react'
 import type { Exercise } from '../../domain/types'
 import { UNIT } from '../../lib/format'
 import { Icon } from '../../ui/icons'
+import type { RowValues } from '../../lib/setValues'
 import { NumberInput } from '../../ui/primitives'
-
-export interface RowValues { weight?: number; value?: number }
 
 interface Props {
   exercise: Exercise

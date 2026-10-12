@@ -31,7 +31,7 @@ export function Today() {
   const week = done[0] ? trainingWeek(done[0].startedAt, now) : 1
   const dayIds = program.days.map((d) => d.id)
   const nextId = active?.dayId ?? nextDayId(dayIds, last?.dayId)
-  const day = program.days.find((d) => d.id === nextId)!
+  const day = program.days.find((d) => d.id === nextId) ?? program.days[0]!
   const thisWeek = done.filter((s) => s.startedAt >= weekStart(now)).length
   const needsBackup = done.length >= 3 && (!lastBackupAt || now - lastBackupAt > BACKUP_DAYS * DAY)
   const mainNames = day.blocks.filter((b) => b.section === 'main').map((b) => exercises.get(b.exerciseId)?.nameAr ?? b.exerciseId)
