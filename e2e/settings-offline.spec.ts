@@ -43,6 +43,9 @@ test('works offline after the service worker installs', async ({ page, context }
 
   await page.goto('./#/settings')
   await expect(page.getByTestId('offline-state')).toContainText('جاهز')
+  await expect(page.getByTestId('image-progress')).toContainText('✅', { timeout: 20_000 })
+  await page.getByRole('button', { name: 'تفاصيل فنية' }).click()
+  await expect(page.getByTestId('diagnostics')).toContainText('controller: true')
   await page.goto('./')
   await expect(page.getByText('بيتجهّز للشغل من غير نت')).toHaveCount(0)
 
@@ -53,5 +56,15 @@ test('works offline after the service worker installs', async ({ page, context }
   const img = page.locator('img').first()
   await expect(img).toBeVisible()
   await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true)
+  await context.setOffline(false)
+})
+
+test('first launch becomes offline-ready without any reload', async ({ page, context }) => {
+  await page.goto('./#/settings')
+  await expect(page.getByTestId('offline-state')).toContainText('جاهز', { timeout: 10_000 })
+  await expect(page.getByTestId('image-progress')).toContainText('✅', { timeout: 20_000 })
+  await context.setOffline(true)
+  await page.goto('./')
+  await expect(page.getByRole('button', { name: /ابدأ يوم/ })).toBeVisible()
   await context.setOffline(false)
 })

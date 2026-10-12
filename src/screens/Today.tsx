@@ -78,6 +78,11 @@ export function Today() {
       {offline === 'preparing' && (
         <Banner tone="warn">⏳ التطبيق بيتجهّز للشغل من غير نت — خليك متصل بالنت لحد ما الرسالة دي تختفي.</Banner>
       )}
+      {offline === 'failed' && (
+        <button type="button" className="block w-full text-right" onClick={() => nav('/settings')}>
+          <Banner tone="warn">⚠️ التجهيز للشغل من غير نت فشل — اضغط هنا وبعدين "إصلاح".</Banner>
+        </button>
+      )}
       {isReturnPhase(week) && <Banner>مرحلة الرجوع: مجموعتين بس في كل تمرين، ووزن تحس إنك كنت تقدر تعمل بيه 3-4 عدات زيادة.</Banner>}
       {!isReturnPhase(week) && isDeloadWeek(week) && <Banner tone="warn">أسبوع خفيف (Deload): مجموعات أقل بنفس الأوزان عشان جسمك يستشفى ويرجع أقوى.</Banner>}
       {needsBackup && (

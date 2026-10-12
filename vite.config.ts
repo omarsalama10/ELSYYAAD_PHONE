@@ -14,7 +14,6 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
-      includeAssets: ['icons/*.png', 'icons/*.svg'],
       manifest: {
         name: 'جيمي — متابعة التمرين',
         short_name: 'جيمي',
@@ -34,9 +33,24 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,svg,jpg,woff2}'],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // Precache only the app shell (~0.5 MB) so install is fast and can't be sunk by one
+        // of 100+ images failing on a flaky connection. Images are cached at runtime and
+        // warmed in the background by the page (src/lib/offline.ts).
+        globPatterns: ['**/*.{js,css,html,woff2}', 'icons/*.{png,svg}'],
+        globIgnores: ['exercises/**'],
         navigateFallback: 'index.html',
+        cleanupOutdatedCaches: true,
+        // Take control of the already-open page right after install, so a first launch
+        // becomes offline-capable without needing a reload (iOS rarely reloads a home-screen app).
+        clientsClaim: true,
+        skipWaiting: true,
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.includes('/exercises/'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'exercise-images', cacheableResponse: { statuses: [200] } },
+          },
+        ],
       },
     }),
   ],

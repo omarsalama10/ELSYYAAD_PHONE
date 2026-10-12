@@ -5,7 +5,7 @@ import { exportBackup, importBackup } from '../db/backup'
 import { getActiveProgram, getSetting, saveProgram, SETTING } from '../db/repo'
 import { createDefaultProgram } from '../data/defaultProgram'
 import { fmtDateLong, todayISO } from '../lib/format'
-import { useOfflineState } from '../lib/offline'
+import { diagnostics, repairOffline, useImageWarmup, useOfflineState, type Diagnostics } from '../lib/offline'
 import { Banner, Button, Card, PageTitle } from '../ui/primitives'
 import { useSafe, useToast } from '../ui/Toast'
 
@@ -39,6 +39,8 @@ export function SettingsScreen() {
   const toast = useToast()
   const fileRef = useRef<HTMLInputElement>(null)
   const offline = useOfflineState()
+  const images = useImageWarmup()
+  const [diag, setDiag] = useState<Diagnostics>()
   const lastBackupAt = useLiveQuery(() => getSetting<number>(SETTING.lastBackupAt), [])
   const counts = useLiveQuery(async () => ({ sessions: await db.sessions.count(), inbody: await db.inbody.count(), media: await db.media.count() }), [])
   const [persisted, setPersisted] = useState<boolean>()
@@ -124,8 +126,29 @@ export function SettingsScreen() {
           الشغل من غير نت:{' '}
           {offline === 'ready' ? <span className="text-accent">جاهز ✅</span>
             : offline === 'preparing' ? <span className="text-warn">بيتجهّز… خليك متصل بالنت</span>
+            : offline === 'failed' ? <span className="text-danger">التجهيز فشل — اضغط "إصلاح" تحت</span>
             : offline === 'unsupported' ? <span className="text-danger">المتصفح ده مش بيدعمه</span> : '—'}
         </p>
+        {images.total > 0 && (
+          <div className="space-y-1" data-testid="image-progress">
+            <p className="text-sm">صور التمارين: <span className="num">{images.done}/{images.total}</span>{images.done >= images.total ? ' ✅' : ''}</p>
+            <div className="h-1.5 overflow-hidden rounded-full bg-accent/10">
+              <div className="h-full rounded-full bg-accent transition-[width] duration-300" style={{ width: `${(images.done / images.total) * 100}%` }} />
+            </div>
+          </div>
+        )}
+        <div className="flex gap-2">
+          <Button variant="soft" className="flex-1 py-2 text-sm" onClick={() => void diagnostics().then(setDiag)}>تفاصيل فنية</Button>
+          <Button variant="soft" className="flex-1 py-2 text-sm" onClick={() => { if (confirm('هيمسح النسخة المتخزنة للتطبيق (مش الداتا بتاعتك) ويحمّلها من جديد. لازم تكون متصل بالنت. تكمّل؟')) void repairOffline() }}>إصلاح</Button>
+        </div>
+        {diag && (
+          <pre className="ltr overflow-x-auto rounded-xl bg-white/70 p-2 text-left text-[11px] leading-relaxed text-muted" data-testid="diagnostics">
+{`online: ${diag.online}  standalone: ${diag.standalone}
+sw: ${diag.swSupported}  controller: ${diag.controller}
+installing: ${diag.installing ?? '-'}  waiting: ${diag.waiting ?? '-'}  active: ${diag.active ?? '-'}
+${diag.caches.map((c) => `${c.name}: ${c.entries}`).join('\n') || 'no caches'}`}
+          </pre>
+        )}
         <p className="text-sm">
           تخزين دائم: {persisted === undefined ? '—' : persisted ? <span className="text-accent">مفعّل ✅</span> : <span className="text-warn">مش مفعّل</span>}
           {usage && <span className="text-muted"> • مستخدم {usage}</span>}

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { ensureSeeded } from './db/seed'
+import { CATALOG } from './data/catalog'
+import { startImageWarmup } from './lib/offline'
 import { Layout } from './ui/Layout'
 import { RestTimerProvider } from './ui/RestTimer'
 import { ToastProvider } from './ui/Toast'
@@ -18,7 +20,10 @@ import { DayDetail } from './screens/DayDetail'
 export default function App() {
   const [state, setState] = useState<'loading' | 'ready' | Error>('loading')
   useEffect(() => {
-    ensureSeeded().then(() => setState('ready'), (e: unknown) => setState(e instanceof Error ? e : new Error(String(e))))
+    ensureSeeded().then(() => {
+      setState('ready')
+      startImageWarmup([...new Set(CATALOG.flatMap((e) => e.images))])
+    }, (e: unknown) => setState(e instanceof Error ? e : new Error(String(e))))
   }, [])
 
   if (state === 'loading') return <div className="flex h-screen items-center justify-center text-muted">...</div>
