@@ -11,6 +11,8 @@ export interface Suggestion {
   /** reps | seconds | meters | minutes, per exercise metric. */
   target: number
   reason: Reason
+  /** Why the suggestion was adjusted (e.g. readiness), shown to the user. */
+  note?: string
 }
 
 export interface SuggestInput {

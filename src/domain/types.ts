@@ -69,6 +69,8 @@ export interface SetLog {
   reps?: number
   seconds?: number
   meters?: number
+  /** Rate of perceived exertion, 6–10. */
+  rpe?: number
   done: boolean
   at: number
 }
@@ -122,4 +124,19 @@ export interface Media {
 export interface Setting {
   key: string
   value: unknown
+}
+
+export type Scale5 = 1 | 2 | 3 | 4 | 5
+
+/** One readiness check-in per day; id is the local date YYYY-MM-DD. */
+export interface CheckIn {
+  id: string
+  sleepHours: number
+  sleepQuality: Scale5
+  stress: Scale5
+  soreness: Scale5
+  fatigue: Scale5
+  pain: boolean
+  painNote?: string
+  at: number
 }
