@@ -8,9 +8,9 @@ const DATA_FILE = 'data.json'
 
 /** Zip with data.json + media/<id> blobs. Records the export time for the reminder. */
 export async function exportBackup(now = Date.now()): Promise<Uint8Array> {
-  const [programs, sessions, sets, inbody, tape, settings, media] = await Promise.all([
+  const [programs, sessions, sets, inbody, tape, settings, media, checkins] = await Promise.all([
     db.programs.toArray(), db.sessions.toArray(), db.sets.toArray(), db.inbody.toArray(),
-    db.tape.toArray(), db.settings.toArray(), db.media.toArray(),
+    db.tape.toArray(), db.settings.toArray(), db.media.toArray(), db.checkins.toArray(),
   ])
   const files: Zippable = {}
   const mediaMeta: MediaMeta[] = []
@@ -19,7 +19,7 @@ export async function exportBackup(now = Date.now()): Promise<Uint8Array> {
     files[file] = [new Uint8Array(await m.blob.arrayBuffer()), { level: 0 }]
     mediaMeta.push({ id: m.id, exerciseId: m.exerciseId, mime: m.mime, createdAt: m.createdAt, file })
   }
-  const data: BackupData = { version: BACKUP_VERSION, exportedAt: now, programs, sessions, sets, inbody, tape, settings, media: mediaMeta }
+  const data: BackupData = { version: BACKUP_VERSION, exportedAt: now, programs, sessions, sets, inbody, tape, settings, media: mediaMeta, checkins }
   files[DATA_FILE] = strToU8(JSON.stringify(data))
   const zip = zipSync(files)
   await db.settings.put({ key: SETTING.lastBackupAt, value: now })
@@ -49,7 +49,7 @@ export async function importBackup(bytes: Uint8Array): Promise<BackupData> {
     return { id: m.id, exerciseId: m.exerciseId, mime: m.mime, createdAt: m.createdAt, blob: new Blob([blob], { type: m.mime }) }
   })
 
-  const tables = [db.programs, db.sessions, db.sets, db.inbody, db.tape, db.settings, db.media]
+  const tables = [db.programs, db.sessions, db.sets, db.inbody, db.tape, db.settings, db.media, db.checkins]
   await db.transaction('rw', tables, async () => {
     await Promise.all(tables.map((t) => t.clear()))
     await db.programs.bulkAdd(data.programs)
@@ -59,6 +59,7 @@ export async function importBackup(bytes: Uint8Array): Promise<BackupData> {
     await db.tape.bulkAdd(data.tape)
     await db.settings.bulkAdd(data.settings)
     await db.media.bulkAdd(media)
+    await db.checkins.bulkAdd(data.checkins)
   })
   return data
 }

@@ -5,6 +5,7 @@ import { ensureSeeded } from '../../src/db/seed'
 import {
   discardSession, exerciseHistory, finishSession, getActiveProgram, getActiveSession, getMedia,
   lastCompletedSession, putMedia, saveInBody, startSession, upsertSet, listInBody, uid,
+  renameExercise, saveCheckIn, getCheckIn,
 } from '../../src/db/repo'
 import { exportBackup, importBackup } from '../../src/db/backup'
 import { nextDayId } from '../../src/domain/rotation'
@@ -77,6 +78,17 @@ describe('exerciseHistory', () => {
   })
 })
 
+describe('rename', () => {
+  it('survives a catalog refresh', async () => {
+    await renameExercise('Hack_Squat', 'هاك على الجهاز')
+    await ensureSeeded(5)
+    expect((await db.exercises.get('Hack_Squat'))?.nameAr).toBe('هاك على الجهاز')
+  })
+  it('rejects empty names', async () => {
+    await expect(renameExercise('Hack_Squat', '  ')).rejects.toThrow()
+  })
+})
+
 describe('backup', () => {
   it('round-trips data and media bytes', async () => {
     const s = await startSession('p', 'A', 1)
@@ -84,6 +96,7 @@ describe('backup', () => {
     await finishSession(s.id, 2)
     await saveInBody({ id: 'ib1', date: '2026-10-12', weight: 70, smm: 30, lean: { ll: 9, rl: 9.4 }, fat: {} })
     await putMedia('Hack_Squat', new Blob([new Uint8Array([9, 8, 7])], { type: 'video/mp4' }), 3)
+    await saveCheckIn({ id: '2026-10-13', sleepHours: 7, sleepQuality: 4, stress: 2, soreness: 3, fatigue: 2, pain: false, at: 1 })
 
     const zip = await exportBackup(10)
     await db.delete()
@@ -96,6 +109,7 @@ describe('backup', () => {
     const m = await getMedia('Hack_Squat')
     expect(Array.from(new Uint8Array(await m!.blob.arrayBuffer()))).toEqual([9, 8, 7])
     expect(m!.mime).toBe('video/mp4')
+    expect((await getCheckIn('2026-10-13'))?.soreness).toBe(3)
   })
 
   it('rejects a bad file and leaves data untouched', async () => {

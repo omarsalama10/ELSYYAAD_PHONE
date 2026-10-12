@@ -1,4 +1,5 @@
-import type { InBody, Media, Program, Session, SetLog, Tape } from '../domain/types'
+import type { CheckIn, InBody, Media, Program, Session, SetLog, Tape } from '../domain/types'
+import { NAME_OVERRIDES } from './seed'
 import { db } from './db'
 
 export const uid = () => crypto.randomUUID()
@@ -141,3 +142,21 @@ export const SETTING = {
   lastBackupAt: 'lastBackupAt',
   restSound: 'restSound',
 } as const
+
+// ---- check-ins ----
+
+export const getCheckIn = (date: string) => db.checkins.get(date)
+export const saveCheckIn = (c: CheckIn) => db.checkins.put(c)
+export const listCheckIns = () => db.checkins.toArray()
+
+// ---- exercise rename ----
+
+export async function renameExercise(id: string, nameAr: string): Promise<void> {
+  const name = nameAr.trim()
+  if (!name) throw new Error('الاسم فاضي')
+  await db.transaction('rw', db.exercises, db.settings, async () => {
+    const overrides = ((await db.settings.get(NAME_OVERRIDES))?.value ?? {}) as Record<string, string>
+    await db.settings.put({ key: NAME_OVERRIDES, value: { ...overrides, [id]: name } })
+    await db.exercises.update(id, { nameAr: name })
+  })
+}

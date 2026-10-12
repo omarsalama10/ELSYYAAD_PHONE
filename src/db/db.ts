@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie'
-import type { Exercise, InBody, Media, Program, Session, SetLog, Setting, Tape } from '../domain/types'
+import type { CheckIn, Exercise, InBody, Media, Program, Session, SetLog, Setting, Tape } from '../domain/types'
 
 export class GymDB extends Dexie {
   exercises!: EntityTable<Exercise, 'id'>
@@ -10,6 +10,7 @@ export class GymDB extends Dexie {
   tape!: EntityTable<Tape, 'id'>
   media!: EntityTable<Media, 'id'>
   settings!: EntityTable<Setting, 'key'>
+  checkins!: EntityTable<CheckIn, 'id'>
 
   constructor(name = 'gym-tracker') {
     super(name)
@@ -23,6 +24,7 @@ export class GymDB extends Dexie {
       media: 'id, exerciseId',
       settings: 'key',
     })
+    this.version(2).stores({ checkins: 'id' })
   }
 }
 
