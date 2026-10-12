@@ -56,13 +56,13 @@ describe('bestPerSession', () => {
 })
 
 describe('validateBackup', () => {
-  const ok = { version: BACKUP_VERSION, exportedAt: 1, programs: [], sessions: [], sets: [], inbody: [], tape: [], settings: [], media: [], checkins: [] }
+  const ok = { version: BACKUP_VERSION, exportedAt: 1, programs: [], sessions: [], sets: [], inbody: [], tape: [], settings: [], media: [], checkins: [], foods: [], meals: [], days: [], weights: [] }
   it('accepts a well-formed backup', () => {
     expect(validateBackup(ok)).toEqual(ok)
   })
   it('upgrades v1 backups (no check-ins) transparently', () => {
-    const { checkins: _c, ...v1 } = { ...ok, version: 1 }
-    expect(validateBackup(v1)).toMatchObject({ version: BACKUP_VERSION, checkins: [] })
+    const { checkins: _c, foods: _f, meals: _m, days: _d, weights: _w, ...v1 } = { ...ok, version: 1 }
+    expect(validateBackup(v1)).toMatchObject({ version: BACKUP_VERSION, checkins: [], meals: [], weights: [] })
   })
   it('rejects wrong version', () => {
     expect(() => validateBackup({ ...ok, version: 99 })).toThrow()

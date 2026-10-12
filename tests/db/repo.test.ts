@@ -118,3 +118,37 @@ describe('backup', () => {
     expect(await db.inbody.count()).toBe(1)
   })
 })
+
+describe('nutrition repo', () => {
+  it('merges catalog foods with price overrides and custom foods', async () => {
+    const { listFoods, saveFood, newFoodId } = await import('../../src/db/nutritionRepo')
+    const { FOODS } = await import('../../src/data/foods')
+    const egg = FOODS.find((f) => f.id === 'egg')!
+    await saveFood({ ...egg, price: 6 })
+    await saveFood({ id: newFoodId(), name: 'كفتة ماما', per100: { kcal: 220, p: 18, c: 5, f: 14 }, serving: { label: 'صباع', grams: 60 }, custom: true })
+    const foods = await listFoods()
+    expect(foods.find((f) => f.id === 'egg')?.price).toBe(6)
+    expect(foods[0]?.name).toBe('كفتة ماما')
+    expect(foods.length).toBe(FOODS.length + 1)
+  })
+
+  it('weights merge InBody days with explicit weigh-ins (weigh-in wins)', async () => {
+    const { logWeight, allWeights } = await import('../../src/db/nutritionRepo')
+    await saveInBody({ id: 'i1', date: '2026-10-01', weight: 68, lean: {}, fat: {} })
+    await saveInBody({ id: 'i2', date: '2026-10-05', weight: 69, lean: {}, fat: {} })
+    await logWeight('2026-10-05', 68.6)
+    expect((await allWeights()).map((w) => [w.id, w.kg])).toEqual([['2026-10-01', 68], ['2026-10-05', 68.6]])
+    await expect(logWeight('2026-10-06', 5)).rejects.toThrow()
+  })
+
+  it('backs up meals and weights', async () => {
+    const { addMeal, logWeight, mealsOn } = await import('../../src/db/nutritionRepo')
+    await addMeal({ date: '2026-10-13', meal: 'lunch', name: 'فول', kcal: 220, p: 15, c: 39, f: 1 })
+    await logWeight('2026-10-13', 70)
+    const zip = await exportBackup(1)
+    await db.delete(); await db.open(); await ensureSeeded(0)
+    await importBackup(zip)
+    expect((await mealsOn('2026-10-13'))[0]?.name).toBe('فول')
+    expect(await db.weights.count()).toBe(1)
+  })
+})
