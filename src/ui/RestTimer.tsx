@@ -42,18 +42,18 @@ export function RestTimerProvider({ children }: { children: ReactNode }) {
     <Ctx.Provider value={{ start, stop }}>
       {children}
       {rest && (
-        <div className="fixed inset-x-0 bottom-0 z-40 pb-safe px-3">
-          <div className={`mx-auto max-w-xl rounded-2xl border p-3 shadow-2xl ${left <= 0 ? 'border-accent bg-accent/20' : 'border-line bg-surface2'}`}>
+        <div className="fixed inset-x-0 bottom-0 z-50 pb-safe px-3">
+          <div className={`mx-auto mb-2 max-w-xl rounded-3xl border p-4 shadow-glass backdrop-blur-xl ${left <= 0 ? 'border-accent/40 bg-accent/15' : 'border-white/80 bg-white/85'}`}>
             <div className="flex items-center gap-3">
               <div className="flex-1">
                 <div className="text-xs text-muted">{left <= 0 ? 'يلا المجموعة الجاية 💪' : 'راحة'}</div>
                 <div className="ltr text-3xl font-bold tabular-nums text-right" data-testid="rest-left">{fmtDuration(Math.max(0, left))}</div>
               </div>
-              <button type="button" className="rounded-lg bg-bg/60 px-3 py-2 text-sm" onClick={() => setRest((r) => r && { ...r, endAt: r.endAt + 15_000, total: r.total + 15 })}>+15ث</button>
-              <button type="button" className="rounded-lg bg-bg/60 px-3 py-2 text-sm" onClick={stop}>تخطي</button>
+              <button type="button" className="rounded-xl bg-white px-3 py-2 text-sm shadow-glass" onClick={() => setRest((r) => r && { ...r, endAt: r.endAt + 15_000, total: r.total + 15 })}>+15ث</button>
+              <button type="button" className="rounded-xl bg-white px-3 py-2 text-sm shadow-glass" onClick={stop}>تخطي</button>
             </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-bg/60">
-              <div className="h-full bg-accent transition-[width] duration-200" style={{ width: `${Math.max(0, Math.min(100, (left / (rest.total * 1000)) * 100))}%` }} />
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-accent/10">
+              <div className="h-full rounded-full bg-gradient-to-l from-accent to-[#5cc9ad] transition-[width] duration-200" style={{ width: `${Math.max(0, Math.min(100, (left / (rest.total * 1000)) * 100))}%` }} />
             </div>
           </div>
         </div>

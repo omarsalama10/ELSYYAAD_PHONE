@@ -18,7 +18,7 @@ export function ExerciseList({ exercises, onPick }: { exercises: Exercise[]; onP
   )
   return (
     <div className="space-y-3">
-      <label className="flex items-center gap-2 rounded-xl border border-line bg-surface2 px-3">
+      <label className="flex items-center gap-2 glass-strong rounded-2xl px-3">
         <Icon.search />
         <input
           type="search"
@@ -28,14 +28,14 @@ export function ExerciseList({ exercises, onPick }: { exercises: Exercise[]; onP
           className="w-full border-0 bg-transparent px-0 focus:border-0"
         />
       </label>
-      <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
+      <ul className="glass divide-y divide-white/70 overflow-hidden">
         {list.map((e) => (
           <li key={e.id}>
-            <button type="button" onClick={() => onPick(e)} className="flex w-full items-center gap-3 p-3 text-right active:bg-surface2">
+            <button type="button" onClick={() => onPick(e)} className="flex w-full items-center gap-3 p-3 text-right active:bg-white/60">
               {e.images[0] ? (
-                <img src={e.images[0]} alt="" loading="lazy" className="h-12 w-16 shrink-0 rounded-lg bg-black object-cover" />
+                <img src={e.images[0]} alt="" loading="lazy" className="h-12 w-16 shrink-0 rounded-xl bg-white object-cover" />
               ) : (
-                <span className="flex h-12 w-16 shrink-0 items-center justify-center rounded-lg bg-surface2 text-muted"><Icon.video /></span>
+                <span className="flex h-12 w-16 shrink-0 items-center justify-center rounded-lg bg-white/60 text-muted"><Icon.video /></span>
               )}
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-bold">{e.nameAr}</span>

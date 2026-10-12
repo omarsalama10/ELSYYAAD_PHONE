@@ -29,7 +29,7 @@ export function ExerciseDemo({ exercise, compact = false }: { exercise: Exercise
       </div>
     )
   return (
-    <div className={`relative w-full ${h} overflow-hidden rounded-xl bg-black`}>
+    <div className={`relative w-full ${h} overflow-hidden rounded-2xl bg-white`}>
       {frames.map((src, i) => (
         <img
           key={src}

@@ -63,7 +63,7 @@ export function ExerciseDetail() {
         </div>
 
         <div className="flex flex-wrap gap-1.5 text-xs">
-          {e.muscles.map((m) => <span key={m} className="rounded-full bg-surface2 px-2 py-0.5 text-muted">{MUSCLE_AR[m] ?? m}</span>)}
+          {e.muscles.map((m) => <span key={m} className="rounded-full bg-white/60 px-2 py-0.5 text-muted">{MUSCLE_AR[m] ?? m}</span>)}
           {e.unilateral && <span className="rounded-full bg-accent2/15 px-2 py-0.5 text-accent2">شمال ويمين منفصل</span>}
         </div>
 

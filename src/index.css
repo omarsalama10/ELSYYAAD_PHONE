@@ -1,17 +1,68 @@
+@import '@fontsource/ibm-plex-sans-arabic/arabic-400.css';
+@import '@fontsource/ibm-plex-sans-arabic/arabic-500.css';
+@import '@fontsource/ibm-plex-sans-arabic/arabic-600.css';
+@import '@fontsource/ibm-plex-sans-arabic/arabic-700.css';
+@import '@fontsource/ibm-plex-sans-arabic/latin-400.css';
+@import '@fontsource/ibm-plex-sans-arabic/latin-600.css';
+@import '@fontsource/ibm-plex-sans-arabic/latin-700.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
-html, body, #root { height: 100%; }
+/* Soft glass theme. Colors are RGB triplets so Tailwind opacity modifiers work. */
+:root {
+  color-scheme: light;
+  --c-bg: 239 246 243;
+  --c-surface: 255 255 255;
+  --c-surface2: 236 244 240;
+  --c-line: 214 227 222;
+  --c-ink: 24 37 46;
+  --c-muted: 104 120 132;
+  --c-accent: 31 143 118;
+  --c-accent2: 226 101 79;
+  --c-warn: 196 120 18;
+  --c-danger: 214 69 69;
+  --c-onaccent: 255 255 255;
+}
+html, body, #root { min-height: 100%; }
 body {
-  @apply bg-bg text-ink font-sans antialiased;
+  @apply text-ink font-sans antialiased;
+  background-color: rgb(var(--c-bg));
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
-input, select, textarea { @apply bg-surface2 text-ink rounded-lg border border-line px-3 py-2 outline-none focus:border-accent; font-size: 16px; }
+/* Fixed gradient layer: iOS Safari ignores background-attachment: fixed. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(120% 60% at 100% 0%, rgba(176, 230, 214, 0.9) 0%, rgba(176, 230, 214, 0) 60%),
+    radial-gradient(110% 70% at 0% 100%, rgba(251, 214, 196, 0.95) 0%, rgba(251, 214, 196, 0) 60%),
+    linear-gradient(160deg, #dff3ec 0%, #f4f1ea 50%, #fbe6da 100%);
+}
+input, select, textarea {
+  @apply rounded-xl border border-white/70 bg-white/70 px-3 py-2 text-ink outline-none backdrop-blur focus:border-accent;
+  font-size: 16px;
+}
+input::placeholder { @apply text-muted/70; }
 input[type='number'] { -moz-appearance: textfield; }
 input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+@layer components {
+  .glass {
+    @apply rounded-3xl border border-white/70 bg-white/55 shadow-glass backdrop-blur-xl;
+  }
+  .glass-strong {
+    @apply rounded-3xl border border-white/80 bg-white/75 shadow-glass backdrop-blur-xl;
+  }
+  .chip {
+    @apply rounded-full bg-white/70 px-2.5 py-0.5 text-xs text-muted;
+  }
+}
 .pt-safe { padding-top: max(env(safe-area-inset-top), 0.75rem); }
 .pb-safe { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
 .ltr { direction: ltr; unicode-bidi: isolate; }
+.num { font-variant-numeric: tabular-nums; }

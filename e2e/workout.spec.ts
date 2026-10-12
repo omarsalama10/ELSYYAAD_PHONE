@@ -45,3 +45,21 @@ test('unilateral exercise shows left/right rows and suggestion uses history', as
   await expect(card.getByTestId('set-row')).toHaveCount(4)
   await expect(card.getByText('شمال').first()).toBeVisible()
 })
+
+test('workouts list → day detail → start workout', async ({ page }) => {
+  await page.goto('./')
+  await page.getByRole('link', { name: 'التمارين' }).click()
+  await page.getByTestId('day-B').click()
+  await expect(page.getByRole('heading', { name: 'يوم B' })).toBeVisible()
+  await expect(page.getByText('هيب ثرست بالبار')).toBeVisible()
+  await page.getByRole('button', { name: 'ابدأ التمرين' }).click()
+  await expect(page).toHaveURL(/#\/session\//)
+  await expect(page.getByTestId('card-B-main-1')).toBeVisible()
+  await expect(page.getByRole('progressbar', { name: 'تقدم التمرين' })).toBeVisible()
+})
+
+test('home quick action opens the InBody form', async ({ page }) => {
+  await page.goto('./')
+  await page.getByRole('link', { name: 'سجّل InBody' }).click()
+  await expect(page.getByLabel('الوزن', { exact: true })).toBeVisible()
+})

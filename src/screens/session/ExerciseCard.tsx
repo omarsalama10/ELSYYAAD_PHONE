@@ -7,7 +7,7 @@ import { fmtNum, UNIT } from '../../lib/format'
 import { suggestionText } from '../../lib/workout'
 import { MUSCLE_AR } from '../../data/catalog'
 import { ExerciseDemo } from '../../ui/ExerciseDemo'
-import { Icon } from '../../ui/icons'
+import { Icon, IconX } from '../../ui/icons'
 import { useRest } from '../../ui/RestTimer'
 import { useSafe } from '../../ui/Toast'
 import { fromLog, toLog, type RowValues } from '../../lib/setValues'
@@ -92,13 +92,18 @@ export function ExerciseCard({ sessionId, block, exercise: e, week, sets, histor
     })
 
   return (
-    <div className={`rounded-2xl border bg-surface ${complete ? 'border-accent/50' : 'border-line'}`} data-testid={`card-${block.id}`}>
+    <div className={`glass ${complete ? 'ring-2 ring-accent/40' : ''}`} data-testid={`card-${block.id}`}>
       <button type="button" className="flex w-full items-center gap-3 p-3 text-right" onClick={onToggle} aria-expanded={open}>
-        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${complete ? 'bg-accent text-bg' : 'bg-surface2 text-muted'}`}>
-          {complete ? <Icon.check /> : `${doneCount}/${need}`}
+        <span className="relative shrink-0">
+          {e.images[0]
+            ? <img src={e.images[0]} alt="" loading="lazy" className="h-12 w-12 rounded-2xl bg-white object-cover" />
+            : <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 text-accent"><IconX.dumbbell /></span>}
+          <span className={`absolute -bottom-1.5 -left-1.5 flex h-6 min-w-6 items-center justify-center rounded-full px-1 text-[10px] font-bold ring-2 ring-white num ${complete ? 'bg-accent text-onaccent' : 'bg-white text-muted'}`}>
+            {complete ? <Icon.check /> : `${doneCount}/${need}`}
+          </span>
         </span>
         <span className="flex-1">
-          <span className="block font-bold leading-tight">{e.nameAr}</span>
+          <span className="block font-semibold leading-tight">{e.nameAr}</span>
           <span className="ltr block text-right text-xs text-muted">{e.name}</span>
         </span>
         <span className="text-sm text-muted ltr">{planned}×{range}{UNIT[e.metric] === 'عدة' ? '' : UNIT[e.metric]}</span>
@@ -110,9 +115,9 @@ export function ExerciseCard({ sessionId, block, exercise: e, week, sets, histor
           <ExerciseDemo exercise={e} compact />
           <div className="flex flex-wrap gap-1.5 text-xs">
             {e.muscles.slice(0, 3).map((m) => (
-              <span key={m} className="rounded-full bg-surface2 px-2 py-0.5 text-muted">{MUSCLE_AR[m] ?? m}</span>
+              <span key={m} className="rounded-full bg-white/60 px-2 py-0.5 text-muted">{MUSCLE_AR[m] ?? m}</span>
             ))}
-            <Link to={`/exercises/${encodeURIComponent(e.id)}`} className="rounded-full bg-surface2 px-2 py-0.5 text-accent2">تفاصيل وفيديو</Link>
+            <Link to={`/exercises/${encodeURIComponent(e.id)}`} className="rounded-full bg-white/60 px-2 py-0.5 text-accent2">تفاصيل وفيديو</Link>
           </div>
           <ul className="list-disc space-y-0.5 pr-5 text-sm leading-relaxed text-ink/90">
             {e.cuesAr.map((c) => <li key={c}>{c}</li>)}

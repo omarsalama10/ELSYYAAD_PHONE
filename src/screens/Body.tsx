@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useSearchParams } from 'react-router-dom'
+import { Segmented } from '../ui/viz'
 import { deleteInBody, deleteTape, listInBody, listTape, saveInBody, saveTape, uid } from '../db/repo'
 import { asymmetryPct, type Point } from '../domain/stats'
 import type { InBody, Segments, Tape, TapeField } from '../domain/types'
@@ -58,7 +60,7 @@ function Delta({ label, first, last, unit, goodWhen }: { label: string; first?: 
   const d = last - first
   const good = d === 0 || !goodWhen ? undefined : (d > 0) === (goodWhen === 'up')
   return (
-    <div className="rounded-xl bg-surface2 p-2 text-center">
+    <div className="glass p-3 text-center">
       <div className="text-xs text-muted">{label}</div>
       <div className="text-lg font-bold">{fmtNum(last)} <span className="text-xs text-muted">{unit}</span></div>
       <div className={`text-xs ${good === undefined ? 'text-muted' : good ? 'text-accent' : 'text-warn'}`}>
@@ -144,7 +146,7 @@ function Asym({ label, l, r }: { label: string; l?: number; r?: number }) {
   const pct = asymmetryPct(l, r)
   const weaker = l < r ? 'الشمال' : 'اليمين'
   return (
-    <div className={`rounded-xl px-3 py-2 text-sm ${pct >= 5 ? 'bg-warn/10 text-warn' : 'bg-surface2 text-muted'}`}>
+    <div className={`rounded-xl px-3 py-2 text-sm ${pct >= 5 ? 'bg-warn/10 text-warn' : 'bg-white/60 text-muted'}`}>
       {label}: فرق {pct}% {pct > 0 ? `— ${weaker} أضعف` : ''}{pct >= 5 ? ' ⚠️ ابدأ بيه وزوّد له مجموعة' : ''}
     </div>
   )
@@ -152,8 +154,9 @@ function Asym({ label, l, r }: { label: string; l?: number; r?: number }) {
 
 export function BodyScreen() {
   const safe = useSafe()
-  const [tab, setTab] = useState<Tab>('inbody')
-  const [editing, setEditing] = useState<InBody | Tape | 'new'>()
+  const [params] = useSearchParams()
+  const [tab, setTab] = useState<Tab>(params.get('tab') === 'tape' ? 'tape' : 'inbody')
+  const [editing, setEditing] = useState<InBody | Tape | 'new' | undefined>(params.get('new') ? 'new' : undefined)
   const inbody = useLiveQuery(() => listInBody(), [])
   const tape = useLiveQuery(() => listTape(), [])
   useEffect(() => window.scrollTo(0, 0), [editing, tab])
@@ -166,13 +169,7 @@ export function BodyScreen() {
   return (
     <div className="space-y-4">
       <PageTitle action={!editing && <Button className="px-3 py-2 text-sm" onClick={() => setEditing('new')}>+ قياس جديد</Button>}>الجسم</PageTitle>
-      <div className="flex gap-2">
-        {(['inbody', 'tape'] as const).map((t) => (
-          <button key={t} type="button" onClick={() => switchTab(t)} className={`flex-1 rounded-xl py-2 font-bold ${tab === t ? 'bg-accent text-bg' : 'bg-surface2 text-muted'}`}>
-            {t === 'inbody' ? 'InBody' : 'مقاسات بالشريط'}
-          </button>
-        ))}
-      </div>
+      <Segmented<Tab> options={[{ value: 'inbody', label: 'InBody' }, { value: 'tape', label: 'مقاسات بالشريط' }]} value={tab} onChange={switchTab} />
 
       {editing && tab === 'inbody' && <InBodyForm initial={editing === 'new' ? undefined : (editing as InBody)} onDone={() => setEditing(undefined)} />}
       {editing && tab === 'tape' && <TapeForm initial={editing === 'new' ? undefined : (editing as Tape)} onDone={() => setEditing(undefined)} />}

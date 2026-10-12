@@ -86,6 +86,8 @@ export function SessionScreen() {
 
   const finished = !!session.finishedAt
   const doneCount = sets?.filter((s) => s.done).length ?? 0
+  const needed = day.blocks.reduce((a, b) => a + effectiveSets(b, week) * (exercises.get(b.exerciseId)?.unilateral ? 2 : 1), 0)
+  const progress = needed ? Math.min(1, doneCount / needed) : 0
   const sections: Section[] = ['warmup', 'main', 'finisher', 'cardio']
 
   const toggle = (blockId: string) =>
@@ -122,9 +124,9 @@ export function SessionScreen() {
 
   return (
     <Bare>
-      <header className="sticky top-0 z-30 -mx-4 border-b border-line bg-bg/95 px-4 pb-3 pt-safe backdrop-blur">
+      <header className="sticky top-0 z-30 -mx-4 border-b border-white/70 bg-white/60 px-4 pb-3 pt-safe backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <Link to="/" className="rounded-lg p-1 text-muted" aria-label="رجوع"><Icon.back /></Link>
+          <Link to="/" className="glass-strong flex h-10 w-10 items-center justify-center rounded-2xl text-muted" aria-label="رجوع"><Icon.back /></Link>
           <div className="flex-1">
             <div className="text-lg font-bold">{day.name}</div>
             <div className="text-xs text-muted">
@@ -132,6 +134,9 @@ export function SessionScreen() {
             </div>
           </div>
           {!finished && <Button className="px-5 py-2" onClick={finish}>إنهاء</Button>}
+        </div>
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-accent/10" role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-valuemin={0} aria-valuemax={100} aria-label="تقدم التمرين">
+          <div className="h-full rounded-full bg-gradient-to-l from-accent to-[#5cc9ad] transition-[width] duration-500" style={{ width: `${progress * 100}%` }} />
         </div>
       </header>
 

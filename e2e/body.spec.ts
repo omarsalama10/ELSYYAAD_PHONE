@@ -24,7 +24,7 @@ test('InBody entries render deltas, asymmetry and charts', async ({ page }) => {
 
   await expect(page.getByText('عضل الرجلين: فرق 6%')).toBeVisible()
   await expect(page.getByText('الشمال أضعف')).toBeVisible()
-  await expect(page.getByTestId('chart').first().locator('path')).toHaveCount(1)
+  await expect(page.getByTestId('chart').first().locator('path[fill="none"]')).toHaveCount(1)
   await expect(page.getByText('(كويس)')).toHaveCount(2)
 })
 
@@ -37,7 +37,7 @@ test('weight is required', async ({ page }) => {
 
 test('tape measurements show forearm left vs right', async ({ page }) => {
   await page.goto('./#/body')
-  await page.getByRole('button', { name: 'مقاسات بالشريط' }).click()
+  await page.getByRole('tab', { name: 'مقاسات بالشريط' }).click()
   await page.getByRole('button', { name: '+ قياس جديد' }).click()
   await page.getByLabel('ساعد يمين').fill('26')
   await page.getByLabel('ساعد شمال').fill('25')

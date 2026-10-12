@@ -13,7 +13,7 @@ test('editing sets in the program changes the workout rows', async ({ page }) =>
   await sets.blur()
   await expect(sets).toHaveValue('2')
 
-  await page.getByRole('link', { name: 'اليوم' }).click()
+  await page.getByRole('link', { name: 'الرئيسية' }).click()
   await page.getByRole('button', { name: 'ابدأ يوم A' }).click()
   const card = page.getByTestId('card-A-warmup-2')
   if ((await card.getAttribute('aria-expanded')) !== 'true') await card.getByRole('button').first().click()

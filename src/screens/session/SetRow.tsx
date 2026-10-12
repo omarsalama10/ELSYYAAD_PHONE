@@ -50,7 +50,7 @@ export function SetRow({ exercise: e, index, sideLabel, log, done, prefill, onDo
   const sw = useStopwatch((sec) => set({ ...shown, value: sec }))
 
   return (
-    <div className={`flex items-center gap-2 rounded-xl px-2 py-1.5 ${done ? 'bg-accent/10' : 'bg-surface2/60'}`} data-testid="set-row">
+    <div className={`flex items-center gap-2 rounded-xl px-2 py-1.5 ${done ? 'bg-accent/10' : 'bg-white/50'}`} data-testid="set-row">
       <span className="w-6 text-center text-sm font-bold text-muted">{index + 1}</span>
       {sideLabel && <span className="w-9 text-xs text-muted">{sideLabel}</span>}
       {showWeight && (
@@ -71,7 +71,7 @@ export function SetRow({ exercise: e, index, sideLabel, log, done, prefill, onDo
         <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted">{UNIT[e.metric]}</span>
       </div>
       {e.metric === 'time' && !done && (
-        <button type="button" aria-label="ساعة إيقاف" onClick={sw.toggle} className={`rounded-lg p-2 ${sw.running ? 'bg-warn text-bg' : 'bg-surface2 text-muted'}`}>
+        <button type="button" aria-label="ساعة إيقاف" onClick={sw.toggle} className={`rounded-lg p-2 ${sw.running ? 'bg-warn text-onaccent' : 'bg-white/60 text-muted'}`}>
           <Icon.timer />
         </button>
       )}
@@ -84,7 +84,7 @@ export function SetRow({ exercise: e, index, sideLabel, log, done, prefill, onDo
             onUndo()
           } else onDone(shown)
         }}
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${done ? 'bg-accent text-bg' : 'border border-line text-muted'}`}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${done ? 'bg-accent text-onaccent' : 'border border-line text-muted'}`}
       >
         <Icon.check />
       </button>

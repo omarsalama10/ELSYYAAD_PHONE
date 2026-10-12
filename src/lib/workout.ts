@@ -1,3 +1,4 @@
+import { MUSCLE_AR } from '../data/catalog'
 import { effectiveSets, type Suggestion } from '../domain/progression'
 import type { Exercise, ProgramDay, Section } from '../domain/types'
 import { UNIT } from './format'
@@ -37,4 +38,25 @@ export function suggestionText(s: Suggestion, e: Exercise): string {
     case 'decrease':
       return `⬇️ خفّض لـ ${w} وركّز على الأداء — ${s.target} ${u}`
   }
+}
+
+/** First image of the day's first main exercise, used as the day's cover. */
+export function dayCover(day: ProgramDay, exercises: Map<string, Exercise>): string | undefined {
+  for (const b of day.blocks) {
+    if (b.section !== 'main') continue
+    const img = exercises.get(b.exerciseId)?.images[0]
+    if (img) return img
+  }
+  return undefined
+}
+
+/** Top primary muscles of the day's main work, e.g. "أمامية • صدر • ظهر أوسط". */
+export function dayFocus(day: ProgramDay, exercises: Map<string, Exercise>, max = 4): string {
+  const seen: string[] = []
+  for (const b of day.blocks) {
+    if (b.section !== 'main') continue
+    const m = exercises.get(b.exerciseId)?.muscles[0]
+    if (m && !seen.includes(m)) seen.push(m)
+  }
+  return seen.slice(0, max).map((m) => MUSCLE_AR[m] ?? m).join(' • ')
 }

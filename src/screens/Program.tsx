@@ -11,6 +11,7 @@ import { ExerciseList } from '../ui/ExerciseList'
 import { Icon } from '../ui/icons'
 import { CommitNumber, PageTitle } from '../ui/primitives'
 import { useSafe } from '../ui/Toast'
+import { Segmented } from '../ui/viz'
 
 type Picker = { mode: 'add'; section: Section } | { mode: 'swap'; blockId: string }
 const SECTIONS: Section[] = ['warmup', 'main', 'finisher', 'cardio']
@@ -59,21 +60,12 @@ export function ProgramScreen() {
 
   return (
     <div className="space-y-4">
-      <PageTitle action={<Link to="/exercises" className="text-sm text-accent2">مكتبة التمارين</Link>}>البرنامج</PageTitle>
+      <PageTitle action={<Link to="/exercises" className="glass-strong rounded-2xl px-3 py-2 text-sm text-accent">مكتبة التمارين</Link>}>
+        <span className="flex items-center gap-2"><Link to="/workouts" aria-label="رجوع" className="text-muted"><Icon.back /></Link>البرنامج</span>
+      </PageTitle>
       <p className="-mt-2 text-sm text-muted">{program.name} — أي تعديل بيتحفظ لوحده.</p>
 
-      <div className="flex gap-2">
-        {program.days.map((d) => (
-          <button
-            key={d.id}
-            type="button"
-            onClick={() => setDayId(d.id)}
-            className={`flex-1 rounded-xl py-2 font-bold ${d.id === day.id ? 'bg-accent text-bg' : 'bg-surface2 text-muted'}`}
-          >
-            {d.name}
-          </button>
-        ))}
-      </div>
+      <Segmented options={program.days.map((d) => ({ value: d.id, label: d.name }))} value={day.id} onChange={setDayId} />
 
       {SECTIONS.map((sec) => {
         const blocks = day.blocks.filter((b) => b.section === sec)
@@ -85,14 +77,14 @@ export function ProgramScreen() {
               const linked = !!b.group && blocks[i - 1]?.group === b.group
               const unit = e ? UNIT[e.metric] : ''
               return (
-                <div key={b.id} className={`rounded-2xl border bg-surface p-3 ${b.group ? 'border-accent2/50' : 'border-line'}`} data-testid={`edit-${b.id}`}>
+                <div key={b.id} className={`glass p-3 ${b.group ? 'ring-2 ring-accent2/40' : ''}`} data-testid={`edit-${b.id}`}>
                   <div className="flex items-start gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="truncate font-bold">{e?.nameAr ?? b.exerciseId}</div>
                       <div className="ltr truncate text-right text-xs text-muted">{e?.name}</div>
                     </div>
-                    <button type="button" aria-label="لفوق" className="rounded-lg bg-surface2 p-1.5" onClick={() => void save(moveBlock(program, day.id, b.id, -1))}><Icon.up /></button>
-                    <button type="button" aria-label="لتحت" className="rounded-lg bg-surface2 p-1.5" onClick={() => void save(moveBlock(program, day.id, b.id, 1))}><Icon.down /></button>
+                    <button type="button" aria-label="لفوق" className="rounded-lg bg-white/60 p-1.5" onClick={() => void save(moveBlock(program, day.id, b.id, -1))}><Icon.up /></button>
+                    <button type="button" aria-label="لتحت" className="rounded-lg bg-white/60 p-1.5" onClick={() => void save(moveBlock(program, day.id, b.id, 1))}><Icon.down /></button>
                     <button type="button" aria-label="حذف" className="rounded-lg bg-danger/15 p-1.5 text-danger" onClick={() => { if (confirm('تشيل التمرين ده من اليوم؟')) void save(removeBlock(program, day.id, b.id)) }}><Icon.trash /></button>
                   </div>
                   <div className="mt-2 grid grid-cols-4 gap-2 text-xs text-muted">

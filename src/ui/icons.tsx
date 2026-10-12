@@ -17,3 +17,17 @@ export const Icon = {
   plus: () => (<svg viewBox="0 0 24 24" className="h-5 w-5" {...P}><path d="M12 5v14M5 12h14" /></svg>),
   search: () => (<svg viewBox="0 0 24 24" className="h-5 w-5" {...P}><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>),
 }
+
+export const IconX = {
+  play: () => (<svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>),
+  arrow: () => (<svg viewBox="0 0 24 24" className="h-5 w-5" {...P}><path d="M15 6l-6 6 6 6" /></svg>),
+  scale: () => (<svg viewBox="0 0 24 24" className="h-5 w-5" {...P}><rect x="3" y="4" width="18" height="16" rx="4" /><path d="M8 9a5 5 0 0 1 8 0M12 9v2" /></svg>),
+  tape: () => (<svg viewBox="0 0 24 24" className="h-5 w-5" {...P}><circle cx="9" cy="12" r="6" /><circle cx="9" cy="12" r="2" /><path d="M15 12h6v4h-6" /></svg>),
+  flame: () => (<svg viewBox="0 0 24 24" className="h-5 w-5" {...P}><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z" /></svg>),
+  clock: () => (<svg viewBox="0 0 24 24" className="h-4 w-4" {...P}><circle cx="12" cy="12" r="8" /><path d="M12 8v4l3 2" /></svg>),
+  layers: () => (<svg viewBox="0 0 24 24" className="h-4 w-4" {...P}><path d="M12 4l8 4-8 4-8-4 8-4zM4 12l8 4 8-4M4 16l8 4 8-4" /></svg>),
+  bolt: () => (<svg viewBox="0 0 24 24" className="h-4 w-4" {...P}><path d="M13 3L5 13h6l-1 8 8-10h-6l1-8z" /></svg>),
+  heart: () => (<svg viewBox="0 0 24 24" className="h-4 w-4" {...P}><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z" /></svg>),
+  edit: () => (<svg viewBox="0 0 24 24" className="h-5 w-5" {...P}><path d="M4 20h4L19 9l-4-4L4 16v4z" /></svg>),
+  dumbbell: () => (<svg viewBox="0 0 24 24" className="h-5 w-5" {...P}><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11" /></svg>),
+}
