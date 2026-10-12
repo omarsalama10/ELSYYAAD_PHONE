@@ -1,0 +1,43 @@
+/// <reference types="vitest" />
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
+
+export default defineConfig({
+  base: './',
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      injectRegister: false,
+      includeAssets: ['icons/*.png', 'icons/*.svg'],
+      manifest: {
+        name: 'جيمي — متابعة التمرين',
+        short_name: 'جيمي',
+        description: 'متابعة التمرين وقياسات InBody بدون إنترنت',
+        lang: 'ar',
+        dir: 'rtl',
+        start_url: './',
+        scope: './',
+        display: 'standalone',
+        orientation: 'portrait',
+        background_color: '#0b0f14',
+        theme_color: '#0b0f14',
+        icons: [
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,png,svg,jpg,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        navigateFallback: 'index.html',
+      },
+    }),
+  ],
+  test: {
+    include: ['tests/**/*.test.ts'],
+    environment: 'node',
+  },
+})
