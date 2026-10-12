@@ -9,7 +9,7 @@ export interface Series { name: string; points: Point[] }
 
 const W = 340
 const H = 170
-const PAD = { top: 14, right: 40, bottom: 22, left: 8 }
+const PAD = { top: 18, right: 14, bottom: 22, left: 8 }
 
 function niceTicks(min: number, max: number, count = 3): number[] {
   if (min === max) return [min]
@@ -85,7 +85,7 @@ export function LineChart({ series, unit = '', title }: { series: Series[]; unit
           {niceTicks(geo.y0, geo.y1).map((t) => (
             <g key={t}>
               <line x1={PAD.left} x2={W - PAD.right} y1={sy(t)} y2={sy(t)} stroke="#2a3442" strokeWidth={1} />
-              <text x={W - PAD.right + 4} y={sy(t) + 4} fontSize={10} fill="#8b98a9">{fmtNum(t)}</text>
+              <text x={PAD.left} y={sy(t) - 3} fontSize={10} fill="#8b98a9">{fmtNum(t)}</text>
             </g>
           ))}
           <text x={PAD.left} y={H - 6} fontSize={10} fill="#8b98a9">{fmtDate(geo.x0)}</text>
@@ -103,7 +103,7 @@ export function LineChart({ series, unit = '', title }: { series: Series[]; unit
                   <circle key={p.x} cx={sx(p.x)} cy={sy(p.y)} r={p.x === hoverX ? 5 : 3.5} fill={color} stroke="#141a22" strokeWidth={2} />
                 ))}
                 {lastP && hoverX === undefined && (
-                  <text x={sx(lastP.x)} y={sy(lastP.y) - 8} fontSize={10} fill="#e8edf3" textAnchor="middle">{fmtNum(lastP.y)}</text>
+                  <text x={sx(lastP.x)} y={sy(lastP.y) - 8} fontSize={11} fill="#e8edf3" textAnchor={pts.length > 1 ? 'end' : 'middle'} fontWeight="bold">{fmtNum(lastP.y)}</text>
                 )}
               </g>
             )
