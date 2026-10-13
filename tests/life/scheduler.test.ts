@@ -111,6 +111,17 @@ describe('plan', () => {
     expect(r.overload).toMatchObject({ day: MON, demandMin: 180, capacityMin: 120 })
   })
 
+  it('never leaves a fragment shorter than minChunk', () => {
+    // 55 free minutes before a commitment, then more time later: a 60-min task must not
+    // become 55 + 5. It is split so every piece is at least minChunkMin (here 40 + 20).
+    const cafe = commitment({ startMin: 10 * 60 + 55, endMin: 16 * 60 })
+    const t = task({ id: 'a', estimateMin: 60 })
+    const r = plan({ tasks: [t], commitments: [cafe], settings: { ...S, minChunkMin: 20 }, now: time(10), days: 1 })
+    const parts = r.blocks.filter((b) => b.taskId === 'a').map((b) => b.endMin - b.startMin)
+    expect(parts.every((m) => m >= 20)).toBe(true)
+    expect(parts.reduce((x, y) => x + y, 0)).toBe(60)
+  })
+
   it('is deterministic', () => {
     const ts = [task({ id: 'a', estimateMin: 45 }), task({ id: 'b', estimateMin: 45 }), task({ id: 'c', estimateMin: 45, importance: 5 })]
     const a = plan({ tasks: ts, commitments: [], settings: S, now: time(9), days: 1 })

@@ -170,12 +170,21 @@ export function plan(input: PlanInput): PlanResult {
         const budget = budgetLeft.get(day)!
         const deep = isDeep ? deepLeft.get(day)! : Infinity
         const cap = Math.min(budget, deep)
-        const slot = slots.find(([a, b]) => Math.min(b - Math.max(a, minStart), cap) >= Math.min(s.minChunkMin, left))
-        if (!slot) break
-        const start = Math.max(slot[0], minStart)
-        const len = Math.min(left, session, slot[1] - start, cap)
-        const chunk = len >= left ? left : Math.floor(len / STEP) * STEP
-        if (chunk <= 0 || (chunk < s.minChunkMin && chunk < left)) break
+        // First slot that yields a valid piece: the whole remainder, or a piece ≥ minChunk that
+        // also leaves ≥ minChunk behind (no 5-minute leftovers).
+        let pick: { slot: Interval; start: number; chunk: number } | undefined
+        for (const slot of slots) {
+          const start = Math.max(slot[0], minStart)
+          const len = Math.min(left, session, slot[1] - start, cap)
+          if (len <= 0) continue
+          let chunk = len >= left ? left : Math.floor(len / STEP) * STEP
+          if (chunk < left && left - chunk < s.minChunkMin) chunk = Math.floor((left - s.minChunkMin) / STEP) * STEP
+          if (chunk <= 0 || (chunk < left && chunk < s.minChunkMin)) continue
+          pick = { slot, start, chunk }
+          break
+        }
+        if (!pick) break
+        const { slot, start, chunk } = pick
         placed.push({ id: `t:${t.id}:${day}:${start}`, day, startMin: start, endMin: start + chunk, kind: 'task', title: t.title, taskId: t.id, confidence: t.confidence })
         slots = subtractIntervals(slots, [[start, Math.min(slot[1], start + chunk + s.gapMin)]])
         free.set(day, slots)
