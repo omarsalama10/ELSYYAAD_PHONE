@@ -75,6 +75,8 @@
 4. **Deploy command:** `npx wrangler deploy -c wrangler.life.jsonc`
 5. **Production branch:** `main`.
 
+> Cloudflare ممكن يعرض اقتراح أو يفتح Pull Request يغيّر `"name"` في `wrangler.jsonc` لـ `elsyyaad-life`. **متقبلوش**: `wrangler.jsonc` خاص بجيمي (`elsyyaad-phone`)، وLife OS بيستخدم `wrangler.life.jsonc` عن طريق `-c` في أمر النشر.
+
 ## للمطوّر
 
 ```bash
