@@ -55,6 +55,7 @@ export async function createTask(f: Partial<Task> & Pick<Task, 'title'>, now = D
     await db.tasks.add(t)
     await db.events.add(event(t.id, 'created', {}, now))
   })
+  if (t.recurrence) await materializeRecurring(now)
   return t
 }
 
@@ -71,7 +72,7 @@ function withStatusRules(before: Task, next: Task, now: number): Task {
 
 export async function updateTask(id: ID, patch: Partial<Task>, opt: { reason?: string; now?: number } = {}): Promise<Task> {
   const now = opt.now ?? Date.now()
-  return db.transaction('rw', db.tasks, db.events, async () => {
+  const saved = await db.transaction('rw', db.tasks, db.events, async () => {
     const before = await db.tasks.get(id)
     if (!before) throw new Error('المهمة غير موجودة')
     const next = withStatusRules(before, { ...before, ...patch, updatedAt: now }, now)
@@ -93,6 +94,8 @@ export async function updateTask(id: ID, patch: Partial<Task>, opt: { reason?: s
     if (evs.length) await db.events.bulkAdd(evs)
     return next
   })
+  if (patch.recurrence) await materializeRecurring(now)
+  return saved
 }
 
 /** Moves a task to a later day/time and records why (feeds the postponement analysis). */
@@ -573,6 +576,7 @@ export async function applyPlanChanges(changes: PlanChange[], title: string, app
       }
     }
   })
+  await materializeRecurring(now)
 }
 
 /** Removes trashed records older than `days`. */

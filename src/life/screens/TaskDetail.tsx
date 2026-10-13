@@ -301,7 +301,7 @@ function PinEditor({ onPin }: { onPin: (day: string, startMin: number) => void }
   const [day, setDay] = useState(today)
   const [time, setTime] = useState('10:00')
   return (
-    <div className="flex items-end gap-2">
+    <div className="grid grid-cols-[1fr_1fr_auto] items-end gap-2">
       <Field label="ثبّت في يوم"><input type="date" className="w-full" value={day} min={today} onChange={(e) => setDay(e.target.value)} /></Field>
       <Field label="الساعة"><input type="time" className="ltr w-full" value={time} onChange={(e) => setTime(e.target.value)} /></Field>
       <Button variant="soft" className="py-2" onClick={() => time && onPin(day, fromTimeInput(time))}>ثبّت</Button>

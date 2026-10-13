@@ -15,9 +15,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: false,
       manifest: {
-        name: 'جيمي — متابعة التمرين',
-        short_name: 'جيمي',
-        description: 'متابعة التمرين وقياسات InBody بدون إنترنت',
+        name: 'ELSYYAAD Life OS',
+        short_name: 'Life OS',
+        description: 'نظام تشغيل شخصي: يومك، مشاريعك، أهدافك، عاداتك والجيم — بدون إنترنت',
         lang: 'ar',
         dir: 'rtl',
         start_url: './',
@@ -39,6 +39,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,woff2}', 'icons/*.{png,svg}'],
         globIgnores: ['exercises/**'],
         navigateFallback: 'index.html',
+        // Notification taps focus/open the app (public/sw-notify.js).
+        importScripts: ['sw-notify.js'],
         cleanupOutdatedCaches: true,
         // Take control of the already-open page right after install, so a first launch
         // becomes offline-capable without needing a reload (iOS rarely reloads a home-screen app).

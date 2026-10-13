@@ -30,7 +30,7 @@ export function Sheet({ open, onClose, title, children, footer }: { open: boolea
 
 export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: ReactNode }) {
   return (
-    <label className="block space-y-1">
+    <label className="block min-w-0 space-y-1">
       <span className="text-xs font-semibold text-muted">{label}</span>
       {children}
       {hint && <span className="block text-[11px] leading-relaxed text-muted">{hint}</span>}

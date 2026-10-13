@@ -24,7 +24,7 @@ async function startDay(page: Page, day: string) {
 async function finish(page: Page) {
   page.once('dialog', (d) => d.accept())
   await page.getByRole('button', { name: 'إنهاء', exact: true }).click()
-  await expect(page).toHaveURL(/#\/$/)
+  await expect(page).toHaveURL(/#\/gym$/)
 }
 
 test('readiness check-in scores the day and adjusts suggestions', async ({ page }) => {

@@ -282,8 +282,10 @@ export function previewPlanFile(raw: unknown, data: ExistingData, opt: { now: nu
         rec.dueAt = at(o.due.slice(0, 10), parseHHMM(o.due.slice(11))!)
       else c.err(`${path}.due`, 'لازم YYYY-MM-DD أو YYYY-MM-DDTHH:mm')
     }
-    setIf(rec, 'estimateMin', c.num(o, 'estimateMin', path, 1, 10_000))
-    setIf(rec, 'confidence', c.oneOf(o, 'confidence', path, ['firm', 'rough'] as const))
+    const est = c.num(o, 'estimateMin', path, 1, 10_000)
+    setIf(rec, 'estimateMin', est)
+    // An explicit estimate is firm unless the file marks it rough.
+    setIf(rec, 'confidence', c.oneOf(o, 'confidence', path, ['firm', 'rough'] as const) ?? (est !== undefined ? 'firm' : undefined))
     setIf(rec, 'energy', c.oneOf(o, 'energy', path, ['deep', 'routine', 'study', 'light'] as const))
     setIf(rec, 'maxSessionMin', c.num(o, 'maxSessionMin', path, 10, 600))
     setIf(rec, 'weight', c.num(o, 'weight', path, 0, 1000, false))

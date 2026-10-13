@@ -46,11 +46,12 @@ describe('tasks', () => {
   })
 
   it('materializes recurring instances idempotently', async () => {
-    await createTask({ title: 'مراجعة يومية', recurrence: { type: 'daily', every: 1 }, startDate: MON, estimateMin: 15 })
-    expect(await materializeRecurring(time(8), 3)).toBe(3)
-    expect(await materializeRecurring(time(8), 3)).toBe(0)
+    // Creating the series already materializes the next 7 days.
+    await createTask({ title: 'مراجعة يومية', recurrence: { type: 'daily', every: 1 }, startDate: MON, estimateMin: 15 }, time(8))
+    expect(await materializeRecurring(time(8), 7)).toBe(0)
+    expect(await materializeRecurring(time(8), 9)).toBe(2)
     const inst = (await db.tasks.toArray()).filter((t) => t.seriesId)
-    expect(inst.map((t) => t.occurrence).sort()).toEqual([MON, addDays(MON, 1), addDays(MON, 2)])
+    expect(inst.map((t) => t.occurrence).sort()).toEqual(Array.from({ length: 9 }, (_, i) => addDays(MON, i)))
     expect(inst.every((t) => !t.recurrence && t.estimateMin === 15)).toBe(true)
   })
 })

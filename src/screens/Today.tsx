@@ -73,7 +73,10 @@ export function Today() {
           <h1 className="text-[1.7rem] font-bold leading-tight tracking-tight">{greeting(now)} 👋</h1>
           <p className="text-sm text-muted">جاهز تكسّر النهارده؟ • الأسبوع {week} من البرنامج</p>
         </div>
-        <Link to="/settings" aria-label="الإعدادات" className="glass-strong flex h-11 w-11 items-center justify-center rounded-2xl text-muted"><Icon.settings /></Link>
+        <div className="flex gap-2">
+          <Link to="/" aria-label="Life OS" className="glass-strong flex h-11 items-center justify-center rounded-2xl px-3 text-xs font-semibold text-accent">Life OS</Link>
+          <Link to="/settings" aria-label="الإعدادات" className="glass-strong flex h-11 w-11 items-center justify-center rounded-2xl text-muted"><Icon.settings /></Link>
+        </div>
       </header>
 
       {offline === 'preparing' && (
