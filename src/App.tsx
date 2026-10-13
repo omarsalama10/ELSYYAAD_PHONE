@@ -20,6 +20,7 @@ import { HistoryDetail, HistoryList } from './screens/History'
 import { NutritionScreen } from './screens/nutrition/Nutrition'
 import { NutritionSetup } from './screens/nutrition/Setup'
 import { ReportScreen } from './screens/Report'
+import { ProgramWizard } from './screens/ProgramWizard'
 
 export default function App() {
   const [state, setState] = useState<'loading' | 'ready' | Error>('loading')
@@ -61,6 +62,7 @@ export default function App() {
             <Route path="history" element={<HistoryList />} />
             <Route path="nutrition/setup" element={<NutritionSetup />} />
             <Route path="report" element={<ReportScreen />} />
+            <Route path="program/new" element={<ProgramWizard />} />
             <Route path="history/:id" element={<HistoryDetail />} />
           </Routes>
         </HashRouter>

@@ -52,6 +52,15 @@ export function WorkoutsScreen() {
         )
       })}
 
+      <Link to="/program/new" className="glass flex items-center gap-3 p-4" data-testid="build-program">
+        <IconWell tone="accent"><IconX.bolt /></IconWell>
+        <div className="flex-1">
+          <div className="font-semibold">ابني برنامج جديد</div>
+          <div className="text-xs text-muted">حسب هدفك وخبرتك ووقتك والأجهزة والإصابات</div>
+        </div>
+        <IconX.arrow />
+      </Link>
+
       <Link to="/exercises" className="glass flex items-center gap-3 p-4">
         <IconWell tone="violet"><IconX.layers /></IconWell>
         <div className="flex-1">

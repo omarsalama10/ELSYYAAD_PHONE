@@ -157,3 +157,17 @@ describe('nutrition repo', () => {
     expect(await db.weights.count()).toBe(1)
   })
 })
+
+describe('multiple programs', () => {
+  it('adding a program activates it and keeps exactly one active', async () => {
+    const { addProgram, setActiveProgram, deleteProgram, listPrograms } = await import('../../src/db/repo')
+    const base = (await getActiveProgram())!
+    await addProgram({ ...base, id: 'custom-1', name: 'جديد' })
+    expect((await getActiveProgram())?.id).toBe('custom-1')
+    expect((await listPrograms()).filter((p) => p.active).length).toBe(1)
+    await expect(deleteProgram('custom-1')).rejects.toThrow()
+    await setActiveProgram(base.id)
+    await deleteProgram('custom-1')
+    expect((await listPrograms()).length).toBe(1)
+  })
+})

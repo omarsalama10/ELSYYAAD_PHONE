@@ -176,3 +176,29 @@ export async function getBodyGoals(): Promise<BodyGoals> {
   return ((await db.settings.get(BODY_GOALS))?.value as BodyGoals | undefined) ?? {}
 }
 export const saveBodyGoals = (g: BodyGoals) => db.settings.put({ key: BODY_GOALS, value: g })
+
+// ---- multiple programs ----
+
+export const listPrograms = () => db.programs.toArray()
+
+/** Exactly one active program at a time. */
+export async function setActiveProgram(id: string): Promise<void> {
+  await db.transaction('rw', db.programs, async () => {
+    const all = await db.programs.toArray()
+    await Promise.all(all.map((p) => db.programs.update(p.id, { active: p.id === id ? 1 : 0 })))
+  })
+}
+
+export async function addProgram(p: Program): Promise<void> {
+  await db.transaction('rw', db.programs, async () => {
+    await db.programs.put({ ...p, active: 0 })
+    const all = await db.programs.toArray()
+    await Promise.all(all.map((x) => db.programs.update(x.id, { active: x.id === p.id ? 1 : 0 })))
+  })
+}
+
+export async function deleteProgram(id: string): Promise<void> {
+  const p = await db.programs.get(id)
+  if (p?.active) throw new Error('مينفعش تمسح البرنامج الشغال — فعّل برنامج تاني الأول')
+  await db.programs.delete(id)
+}
