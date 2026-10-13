@@ -1,4 +1,4 @@
-import type { CheckIn, InBody, Media, Program, Session, SetLog, Tape } from '../domain/types'
+import type { BodyGoals, CheckIn, InBody, Media, Pose, ProgressPhoto, Program, Session, SetLog, Tape } from '../domain/types'
 import { NAME_OVERRIDES } from './seed'
 import { db } from './db'
 
@@ -159,4 +159,46 @@ export async function renameExercise(id: string, nameAr: string): Promise<void> 
     await db.settings.put({ key: NAME_OVERRIDES, value: { ...overrides, [id]: name } })
     await db.exercises.update(id, { nameAr: name })
   })
+}
+
+// ---- progress photos & body goals ----
+
+export async function addPhoto(date: string, pose: Pose, blob: Blob): Promise<ProgressPhoto> {
+  const p: ProgressPhoto = { id: uid(), date, pose, blob, mime: blob.type || 'image/jpeg', at: Date.now() }
+  await db.photos.add(p)
+  return p
+}
+export const listPhotos = () => db.photos.orderBy('date').toArray()
+export const deletePhoto = (id: string) => db.photos.delete(id)
+
+const BODY_GOALS = 'bodyGoals'
+export async function getBodyGoals(): Promise<BodyGoals> {
+  return ((await db.settings.get(BODY_GOALS))?.value as BodyGoals | undefined) ?? {}
+}
+export const saveBodyGoals = (g: BodyGoals) => db.settings.put({ key: BODY_GOALS, value: g })
+
+// ---- multiple programs ----
+
+export const listPrograms = () => db.programs.toArray()
+
+/** Exactly one active program at a time. */
+export async function setActiveProgram(id: string): Promise<void> {
+  await db.transaction('rw', db.programs, async () => {
+    const all = await db.programs.toArray()
+    await Promise.all(all.map((p) => db.programs.update(p.id, { active: p.id === id ? 1 : 0 })))
+  })
+}
+
+export async function addProgram(p: Program): Promise<void> {
+  await db.transaction('rw', db.programs, async () => {
+    await db.programs.put({ ...p, active: 0 })
+    const all = await db.programs.toArray()
+    await Promise.all(all.map((x) => db.programs.update(x.id, { active: x.id === p.id ? 1 : 0 })))
+  })
+}
+
+export async function deleteProgram(id: string): Promise<void> {
+  const p = await db.programs.get(id)
+  if (p?.active) throw new Error('مينفعش تمسح البرنامج الشغال — فعّل برنامج تاني الأول')
+  await db.programs.delete(id)
 }

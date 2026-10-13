@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link } from 'react-router-dom'
-import { getActiveProgram, saveProgram, uid } from '../db/repo'
+import { deleteProgram, getActiveProgram, listPrograms, saveProgram, setActiveProgram, uid } from '../db/repo'
 import { addBlock, moveBlock, removeBlock, toggleSupersetWithPrev, updateBlock } from '../domain/programEdit'
 import type { Block, Exercise, Program, Section } from '../domain/types'
 import { UNIT } from '../lib/format'
@@ -63,7 +63,8 @@ export function ProgramScreen() {
       <PageTitle action={<Link to="/exercises" className="glass-strong rounded-2xl px-3 py-2 text-sm text-accent">مكتبة التمارين</Link>}>
         <span className="flex items-center gap-2"><Link to="/workouts" aria-label="رجوع" className="text-muted"><Icon.back /></Link>البرنامج</span>
       </PageTitle>
-      <p className="-mt-2 text-sm text-muted">{program.name} — أي تعديل بيتحفظ لوحده.</p>
+      <ProgramSwitcher activeId={program.id} />
+      <p className="-mt-2 text-xs text-muted">أي تعديل بيتحفظ لوحده.</p>
 
       <Segmented options={program.days.map((d) => ({ value: d.id, label: d.name }))} value={day.id} onChange={setDayId} />
 
@@ -110,6 +111,29 @@ export function ProgramScreen() {
           </section>
         )
       })}
+    </div>
+  )
+}
+
+function ProgramSwitcher({ activeId }: { activeId: string }) {
+  const safe = useSafe()
+  const programs = useLiveQuery(() => listPrograms(), [])
+  if (!programs) return null
+  return (
+    <div className="glass space-y-2 p-3">
+      <div className="flex items-center gap-2">
+        <select className="min-w-0 flex-1" value={activeId} onChange={(e) => void safe(() => setActiveProgram(e.target.value), 'البرنامج اتغيّر')} aria-label="البرنامج الشغال">
+          {programs.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+        </select>
+        <Link to="/program/new" className="shrink-0 rounded-2xl bg-accent px-3 py-2 text-sm font-semibold text-white shadow-lift">+ جديد</Link>
+      </div>
+      {programs.length > 1 && (
+        <div className="flex flex-wrap gap-2 text-xs">
+          {programs.filter((p) => p.id !== activeId).map((p) => (
+            <button key={p.id} type="button" className="text-danger" onClick={() => { if (confirm(`تمسح "${p.name}"؟ سجل تمارينك مش هيتمسح.`)) void safe(() => deleteProgram(p.id)) }}>مسح: {p.name}</button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

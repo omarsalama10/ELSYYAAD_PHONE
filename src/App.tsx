@@ -17,6 +17,10 @@ import { SettingsScreen } from './screens/Settings'
 import { WorkoutsScreen } from './screens/Workouts'
 import { DayDetail } from './screens/DayDetail'
 import { HistoryDetail, HistoryList } from './screens/History'
+import { NutritionScreen } from './screens/nutrition/Nutrition'
+import { NutritionSetup } from './screens/nutrition/Setup'
+import { ReportScreen } from './screens/Report'
+import { ProgramWizard } from './screens/ProgramWizard'
 import { materializeRecurring, snapshotOnUpgrade } from './life/db/repo'
 import { LifeProvider } from './life/state'
 import { ReminderEngine } from './life/lib/reminderEngine'
@@ -101,12 +105,16 @@ export default function App() {
                   <Route path="exercises" element={<LibraryScreen />} />
                   <Route path="body" element={<BodyScreen />} />
                   <Route path="progress" element={<ProgressScreen />} />
+                  <Route path="nutrition" element={<NutritionScreen />} />
                 </Route>
                 <Route path="session/:id" element={<SessionScreen />} />
                 <Route path="exercises/:id" element={<ExerciseDetail />} />
                 <Route path="workouts/:dayId" element={<DayDetail />} />
                 <Route path="history" element={<HistoryList />} />
                 <Route path="history/:id" element={<HistoryDetail />} />
+                <Route path="nutrition/setup" element={<NutritionSetup />} />
+                <Route path="report" element={<ReportScreen />} />
+                <Route path="program/new" element={<ProgramWizard />} />
               </Routes>
             </QuickAddProvider>
           </HashRouter>

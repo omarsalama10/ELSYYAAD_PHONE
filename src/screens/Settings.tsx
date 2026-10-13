@@ -7,6 +7,7 @@ import { exportBackup, importBackup } from '../db/backup'
 import { getActiveProgram, getSetting, saveProgram, SETTING } from '../db/repo'
 import { createDefaultProgram } from '../data/defaultProgram'
 import { fmtDateLong, todayISO } from '../lib/format'
+import { exportCsvZip } from '../lib/exportData'
 import { diagnostics, repairOffline, useImageWarmup, useOfflineState, type Diagnostics } from '../lib/offline'
 import { Banner, Button, Card, PageTitle } from '../ui/primitives'
 import { useSafe, useToast } from '../ui/Toast'
@@ -133,6 +134,18 @@ export function SettingsScreen() {
           <Button variant="soft" className="flex-1" onClick={() => fileRef.current?.click()}>استرجاع نسخة</Button>
         </div>
         <input ref={fileRef} type="file" accept=".zip,application/zip" className="hidden" onChange={(e) => { void doImport(e.target.files?.[0]); e.target.value = '' }} />
+      </Card>
+
+      <Card className="space-y-2">
+        <h2 className="font-bold">تصدير البيانات</h2>
+        <p className="text-sm text-muted">لتحليل تقدمك بنفسك في Excel أو مع ChatGPT.</p>
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="soft" className="py-2 text-sm" onClick={() => void safe(async () => {
+            const file = new File([await exportCsvZip()], `gymy-data-${todayISO()}.zip`, { type: 'application/zip' })
+            await deliver(file)
+          })}>CSV + JSON</Button>
+          <Link to="/report" className="rounded-2xl border border-white/80 bg-white/70 px-4 py-2 text-center text-sm shadow-glass">تقرير PDF / ChatGPT</Link>
+        </div>
       </Card>
 
       <Card className="space-y-2">

@@ -1,7 +1,8 @@
-import type { CheckIn, InBody, Program, Session, SetLog, Setting, Tape } from './types'
+import type { CheckIn, InBody, Pose, Program, Session, SetLog, Setting, Tape } from './types'
+import type { DayLog, Food, MealEntry, WeightLog } from './nutrition/types'
 
-export const BACKUP_VERSION = 2
-const SUPPORTED = [1, 2]
+export const BACKUP_VERSION = 4
+const SUPPORTED = [1, 2, 3, 4]
 
 export interface MediaMeta {
   id: string
@@ -23,17 +24,25 @@ export interface BackupData {
   settings: Setting[]
   media: MediaMeta[]
   checkins: CheckIn[]
+  foods: Food[]
+  meals: MealEntry[]
+  days: DayLog[]
+  weights: WeightLog[]
+  photos: PhotoMeta[]
 }
 
-const TABLES = ['programs', 'sessions', 'sets', 'inbody', 'tape', 'settings', 'media', 'checkins'] as const
+export interface PhotoMeta { id: string; date: string; pose: Pose; mime: string; at: number; file: string }
+
+const TABLES = ['programs', 'sessions', 'sets', 'inbody', 'tape', 'settings', 'media', 'checkins', 'foods', 'meals', 'days', 'weights', 'photos'] as const
+/** Tables added after v1, defaulted to empty when importing an older backup. */
+const LATER: Record<string, number> = { checkins: 2, foods: 3, meals: 3, days: 3, weights: 3, photos: 4 }
 
 /** Shape check before any destructive import; throws a user-facing Arabic message. */
 export function validateBackup(x: unknown): BackupData {
   if (typeof x !== 'object' || x === null) throw new Error('الملف مش نسخة احتياطية صالحة')
   const o = x as Record<string, unknown>
   if (!SUPPORTED.includes(o.version as number)) throw new Error(`إصدار النسخة غير مدعوم (${String(o.version)})`)
-  // v1 backups predate check-ins.
-  if (o.version === 1 && o.checkins === undefined) o.checkins = []
+  for (const [t, since] of Object.entries(LATER)) if ((o.version as number) < since && o[t] === undefined) o[t] = []
   for (const t of TABLES) {
     const rows = o[t]
     if (!Array.isArray(rows)) throw new Error(`النسخة ناقصة: ${t}`)

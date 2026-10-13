@@ -17,7 +17,7 @@ export function MoreScreen() {
     { to: '/inbox', label: 'التنبيهات والمتابعة', sub: 'تذكيرات فاتت وأسئلة متابعة', icon: LI.bell(), badge: inbox },
     { to: '/data', label: 'Claude والبيانات', sub: 'صدّر الحالة، استورد خطة، نسخ رجوع', icon: LI.data() },
     { to: '/templates', label: 'القوالب', sub: 'مهام ومشاريع جاهزة', icon: LI.template() },
-    { to: '/gym', label: 'الصحة والجيم', sub: 'التمارين وInBody والقياسات', icon: LI.dumbbell() },
+    { to: '/gym', label: 'الصحة والجيم', sub: 'التمرين والأكل وInBody والجسم', icon: LI.dumbbell() },
     { to: '/trash', label: 'سلة المحذوفات', sub: 'استرجاع أي حاجة اتحذفت بالغلط', icon: LI.trash(), badge: trash },
     { to: '/settings', label: 'الإعدادات', sub: 'التخطيط، التذكير، النسخ الاحتياطي', icon: LI.settings() },
   ]

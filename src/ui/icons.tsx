@@ -5,6 +5,7 @@ export const Icon = {
   program: () => (<svg viewBox="0 0 24 24" className="h-6 w-6" {...P}><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M8 9h8M8 13h8M8 17h5" /></svg>),
   body: () => (<svg viewBox="0 0 24 24" className="h-6 w-6" {...P}><circle cx="12" cy="5" r="2" /><path d="M12 7v7M8 10h8M12 14l-3 7M12 14l3 7" /></svg>),
   progress: () => (<svg viewBox="0 0 24 24" className="h-6 w-6" {...P}><path d="M4 19h16M6 15l4-4 3 3 5-6" /></svg>),
+  food: () => (<svg viewBox="0 0 24 24" className="h-6 w-6" {...P}><path d="M4 11h16a8 8 0 0 1-16 0zM12 3c0 2-2 2-2 4M15 4c0 2-2 2-2 4" /></svg>),
   settings: () => (<svg viewBox="0 0 24 24" className="h-6 w-6" {...P}><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></svg>),
   check: () => (<svg viewBox="0 0 24 24" className="h-5 w-5" {...P} strokeWidth={3}><path d="M5 12l5 5 9-10" /></svg>),
   back: () => (<svg viewBox="0 0 24 24" className="h-6 w-6" {...P}><path d="M9 6l6 6-6 6" /></svg>),

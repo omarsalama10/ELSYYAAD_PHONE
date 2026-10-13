@@ -15,12 +15,12 @@ const LIFE_TABS = [
 const GYM_TABS = [
   { to: '/gym', label: 'الرئيسية', icon: Icon.today, end: true },
   { to: '/workouts', label: 'التمارين', icon: Icon.program },
+  { to: '/nutrition', label: 'التغذية', icon: Icon.food },
   { to: '/progress', label: 'التقدم', icon: Icon.progress },
   { to: '/body', label: 'الجسم', icon: Icon.body },
-  { to: '/settings', label: 'الإعدادات', icon: Icon.settings },
 ]
 
-const GYM_PATHS = ['/gym', '/workouts', '/program', '/exercises', '/body', '/progress']
+const GYM_PATHS = ['/gym', '/workouts', '/program', '/exercises', '/body', '/progress', '/nutrition']
 export const isGymPath = (p: string) => GYM_PATHS.some((g) => p === g || p.startsWith(`${g}/`))
 
 export function Layout() {
