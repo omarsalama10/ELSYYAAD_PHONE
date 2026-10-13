@@ -82,6 +82,12 @@ describe('plan file preview', () => {
     expect(p.errors.join()).toContain('اعتماديات دائرية')
   })
 
+  it('parses a task time window', () => {
+    const p = previewPlanFile({ schema: PLAN_SCHEMA, tasks: [{ title: 'تسجيل', window: { start: '11:30', end: '15:00' } }, { title: 'غلط', window: { start: '15:00', end: '11:30' } }] }, empty(), opt)
+    expect(p.errors.join()).toContain('tasks[1].window')
+    expect(p.changes[0]!.record).toMatchObject({ window: { startMin: 690, endMin: 900 } })
+  })
+
   it('patches settings with HH:mm times', () => {
     const p = previewPlanFile({ schema: PLAN_SCHEMA, settings: { dayStart: '07:30', bufferPct: 0.2, restWeekdays: [5] } }, empty(), opt)
     expect(p.errors).toEqual([])

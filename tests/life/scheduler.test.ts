@@ -140,6 +140,19 @@ describe('plan', () => {
     expect(r.atRisk.map((x) => x.taskId)).toEqual(['near'])
   })
 
+  it('respects a task time window (e.g. recording only at home)', () => {
+    const rec = task({ id: 'rec', estimateMin: 60, importance: 1, window: { startMin: 13 * 60, endMin: 15 * 60 } })
+    const edit = task({ id: 'edit', estimateMin: 60, importance: 5 })
+    const r = plan({ tasks: [rec, edit], commitments: [], settings: S, now: time(9), days: 1 })
+    expect(r.blocks.find((b) => b.taskId === 'rec')).toMatchObject({ startMin: 780, endMin: 840 })
+    expect(r.blocks.find((b) => b.taskId === 'edit')).toMatchObject({ startMin: 540 })
+    // A window that can't hold the work leaves it unscheduled instead of breaking the rule.
+    const big = task({ id: 'big', estimateMin: 300, window: { startMin: 13 * 60, endMin: 14 * 60 } })
+    const r2 = plan({ tasks: [big], commitments: [], settings: S, now: time(9), days: 1 })
+    expect(r2.blocks.every((b) => b.startMin >= 780 && b.endMin <= 840)).toBe(true)
+    expect(r2.unscheduled[0]).toMatchObject({ taskId: 'big', reason: 'no_capacity' })
+  })
+
   it('is deterministic', () => {
     const ts = [task({ id: 'a', estimateMin: 45 }), task({ id: 'b', estimateMin: 45 }), task({ id: 'c', estimateMin: 45, importance: 5 })]
     const a = plan({ tasks: ts, commitments: [], settings: S, now: time(9), days: 1 })

@@ -63,6 +63,8 @@ export interface Task {
   occurrence?: DayKey
   /** User-pinned slot. The planner treats it like a fixed commitment. */
   pinned?: { day: DayKey; startMin: number }
+  /** Allowed time of day for this task (e.g. recording only at home 11:30–15:00). */
+  window?: { startMin: number; endMin: number }
   /** Manually starred into "top 3" for that day. */
   topDay?: DayKey
   postponeCount: number

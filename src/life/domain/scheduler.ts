@@ -174,9 +174,11 @@ export function plan(input: PlanInput): PlanResult {
         // also leaves ≥ minChunk behind (no 5-minute leftovers).
         let pick: { slot: Interval; start: number; chunk: number } | undefined
         // Deep work only inside the configured deep-work window (if any).
-        const usable = isDeep && s.deepStartMin !== undefined && s.deepEndMin !== undefined && s.deepEndMin > s.deepStartMin
+        let usable = isDeep && s.deepStartMin !== undefined && s.deepEndMin !== undefined && s.deepEndMin > s.deepStartMin
           ? subtractIntervals(slots, [[0, s.deepStartMin], [s.deepEndMin, 1440]])
           : slots
+        // …and only inside the task's own allowed time of day, if it has one.
+        if (t.window && t.window.endMin > t.window.startMin) usable = subtractIntervals(usable, [[0, t.window.startMin], [t.window.endMin, 1440]])
         for (const slot of usable) {
           const start = Math.max(slot[0], minStart)
           const len = Math.min(left, session, slot[1] - start, cap)

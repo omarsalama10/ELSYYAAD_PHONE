@@ -69,11 +69,11 @@ All keys are optional except `schema`.
 | goals | title*, outcome, successCriteria, kind (project/learning/work/habit/personal), horizon (monthly/quarterly/yearly/custom), startDate, targetDate, metric ({type:tasks} / {type:numeric, unit, start, target, current} / {type:milestones}), status (active/paused/achieved/dropped), reason |
 | projects | name*, description, status (active/paused/done/archived), color, category, goal, startDate, targetDate, weighting (equal/estimate/custom) |
 | milestones | title*, project, goal, parent, dueDate, order, status (open/done), dependsOn |
-| tasks | title*, description, notes, links[], tags[], category, project, milestone, goal, importance 1–5, priorityOverride 0–100, status, progress 0–100, startDate, due, estimateMin, confidence (firm/rough), energy (deep/routine/study/light), maxSessionMin, weight, dependsOn[], checklist[] (strings or {title, done}), recurrence ({type:daily, every} / {type:weekly, weekdays} / {type:monthly, day}), pinned ({day, time}) |
+| tasks | title*, description, notes, links[], tags[], category, project, milestone, goal, importance 1–5, priorityOverride 0–100, status, progress 0–100, startDate, due, estimateMin, confidence (firm/rough), energy (deep/routine/study/light), maxSessionMin, weight, dependsOn[], checklist[] (strings or {title, done}), recurrence ({type:daily, every} / {type:weekly, weekdays} / {type:monthly, day}), pinned ({day, time}), window ({start, end} — allowed time of day, e.g. recording only at home) |
 | commitments | title*, kind (work/class/appointment/sleep/meal/gym/prayer/other), repeat* ({type:once, day} / {type:weekly, weekdays} / {type:daily}), start*, end*, validFrom, validUntil, skipDays[], remindBeforeMin |
 | habits | title*, schedule ({type:daily} / {type:weekly, weekdays} / {type:timesPerWeek, times}), goal, archived |
 | notes | title*, kind (note/idea/decision/risk/issue), body, project, goal, task, day, tags[], severity 1–3, open |
-| settings | dayStart, dayEnd, quietStart, quietEnd, morningSummary, eveningReview (HH:mm); bufferPct 0–0.5; gapMin; defaultSessionMin; maxDeepMinPerDay; planHorizonDays; remindBeforeMin; accountability (calm/balanced/firm); restWeekdays[] |
+| settings | dayStart, dayEnd, quietStart, quietEnd, morningSummary, eveningReview, deepStart, deepEnd (HH:mm); bufferPct 0–0.5; gapMin; defaultSessionMin; maxDeepMinPerDay; planHorizonDays; remindBeforeMin; accountability (calm/balanced/firm); restWeekdays[] |
 
 `*` required when creating.
 

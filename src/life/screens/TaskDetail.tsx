@@ -179,6 +179,14 @@ export function TaskDetail() {
           <Field label="أقصى جلسة (دقيقة)" hint={`فاضي = ${s.defaultSessionMin}`}>
             <CommitText ariaLabel="أقصى جلسة" value={t.maxSessionMin ? String(t.maxSessionMin) : ''} onCommit={(v) => patch({ maxSessionMin: Number(v) > 0 ? Math.round(Number(v)) : undefined })} className="ltr" />
           </Field>
+          <Field label="مسموح من (اختياري)" hint="مثلًا التسجيل في البيت بس">
+            <input type="time" aria-label="مسموح من" className="ltr w-full" value={t.window ? toTimeInput(t.window.startMin) : ''}
+              onChange={(e) => patch({ window: e.target.value ? { startMin: fromTimeInput(e.target.value), endMin: Math.max(fromTimeInput(e.target.value) + 15, t.window?.endMin ?? 0) } : undefined })} />
+          </Field>
+          <Field label="لحد">
+            <input type="time" aria-label="مسموح لحد" className="ltr w-full" value={t.window ? toTimeInput(t.window.endMin) : ''} disabled={!t.window}
+              onChange={(e) => t.window && e.target.value && fromTimeInput(e.target.value) > t.window.startMin && patch({ window: { ...t.window, endMin: fromTimeInput(e.target.value) } })} />
+          </Field>
           <Field label="الوزن في المشروع" hint="لو المشروع بأوزان مخصصة">
             <CommitText ariaLabel="الوزن" value={t.weight !== undefined ? String(t.weight) : ''} onCommit={(v) => patch({ weight: v === '' ? undefined : Math.max(0, Number(v)) })} className="ltr" />
           </Field>

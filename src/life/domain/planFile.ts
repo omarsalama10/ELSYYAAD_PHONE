@@ -302,6 +302,14 @@ export function previewPlanFile(raw: unknown, data: ExistingData, opt: { now: nu
       if (o.recurrence === null) delete rec.recurrence
       else { const r = parseRecurrence(c, o.recurrence, `${path}.recurrence`); if (r) rec.recurrence = r }
     }
+    if (o.window !== undefined) {
+      if (o.window === null) delete rec.window
+      else if (isObj(o.window)) {
+        const ws = c.time(o.window, 'start', `${path}.window`), we = c.time(o.window, 'end', `${path}.window`)
+        if (ws !== undefined && we !== undefined && we > ws) rec.window = { startMin: ws, endMin: we }
+        else if (ws !== undefined && we !== undefined) c.err(`${path}.window`, 'end لازم يكون بعد start')
+      } else c.err(`${path}.window`, 'لازم { start, end }')
+    }
     if (o.pinned !== undefined) {
       if (o.pinned === null) delete rec.pinned
       else if (isObj(o.pinned)) {
