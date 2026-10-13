@@ -82,7 +82,7 @@ export function SessionScreen() {
       <Bare>
         <div className="pt-safe space-y-4">
           <p className="text-muted">التمرين ده مش موجود.</p>
-          <Button onClick={() => nav('/gym')}>رجوع</Button>
+          <Button onClick={() => nav('/')}>رجوع</Button>
         </div>
       </Bare>
     )
@@ -106,7 +106,7 @@ export function SessionScreen() {
       if (doneCount === 0) {
         if (!confirm('مفيش ولا مجموعة متسجلة. تلغي التمرين؟')) return
         await discardSession(session.id)
-        nav('/gym')
+        nav('/')
         return
       }
       if (!confirm('تنهي التمرين؟')) return
@@ -114,7 +114,7 @@ export function SessionScreen() {
       await finishSession(session.id)
       try { await navigator.storage?.persist?.() } catch { /* best effort */ }
       toast(`عاش! ${doneCount} مجموعة النهارده 💪`)
-      nav('/gym')
+      nav('/')
     })
 
   const discard = () =>
@@ -122,14 +122,14 @@ export function SessionScreen() {
       if (!confirm('تمسح التمرين ده بكل اللي اتسجل فيه؟')) return
       rest.stop()
       await discardSession(session.id)
-      nav('/gym')
+      nav('/')
     })
 
   return (
     <Bare>
       <header className="sticky top-0 z-30 -mx-4 border-b border-white/70 bg-white/60 px-4 pb-3 pt-safe backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <Link to="/gym" className="glass-strong flex h-10 w-10 items-center justify-center rounded-2xl text-muted" aria-label="رجوع"><Icon.back /></Link>
+          <Link to="/" className="glass-strong flex h-10 w-10 items-center justify-center rounded-2xl text-muted" aria-label="رجوع"><Icon.back /></Link>
           <div className="flex-1">
             <div className="text-lg font-bold">{day.name}</div>
             <div className="text-xs text-muted">

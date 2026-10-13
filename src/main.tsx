@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
-import App from './App'
+import App from '@app'
 import './index.css'
 
 const HOUR = 60 * 60 * 1000

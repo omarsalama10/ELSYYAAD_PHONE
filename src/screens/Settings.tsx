@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Link } from 'react-router-dom'
-import { lifeDb } from '../life/db/db'
 import { db } from '../db/db'
 import { exportBackup, importBackup } from '../db/backup'
 import { getActiveProgram, getSetting, saveProgram, SETTING } from '../db/repo'
 import { createDefaultProgram } from '../data/defaultProgram'
 import { fmtDateLong, todayISO } from '../lib/format'
+import { Link } from 'react-router-dom'
 import { exportCsvZip } from '../lib/exportData'
 import { diagnostics, repairOffline, useImageWarmup, useOfflineState, type Diagnostics } from '../lib/offline'
 import { Banner, Button, Card, PageTitle } from '../ui/primitives'
@@ -45,7 +44,7 @@ export function SettingsScreen() {
   const images = useImageWarmup()
   const [diag, setDiag] = useState<Diagnostics>()
   const lastBackupAt = useLiveQuery(() => getSetting<number>(SETTING.lastBackupAt), [])
-  const counts = useLiveQuery(async () => ({ sessions: await db.sessions.count(), inbody: await db.inbody.count(), media: await db.media.count(), tasks: await lifeDb.tasks.count(), projects: await lifeDb.projects.count() }), [])
+  const counts = useLiveQuery(async () => ({ sessions: await db.sessions.count(), inbody: await db.inbody.count(), media: await db.media.count() }), [])
   const [persisted, setPersisted] = useState<boolean>()
   const [usage, setUsage] = useState<string>()
 
@@ -61,7 +60,7 @@ export function SettingsScreen() {
   const doExport = () =>
     safe(async () => {
       const bytes = await exportBackup()
-      const file = new File([bytes], `elsyyaad-backup-${todayISO()}.zip`, { type: 'application/zip' })
+      const file = new File([bytes], `gymy-backup-${todayISO()}.zip`, { type: 'application/zip' })
       const r = await deliver(file)
       if (r === 'shared') toast('النسخة اتبعتت — اختار "Save to Files" وحطها على iCloud')
       if (r === 'downloaded') toast('النسخة اتنزلت')
@@ -72,7 +71,7 @@ export function SettingsScreen() {
       if (!f) return
       if (!confirm('الاسترجاع هيمسح كل الداتا الحالية ويحط مكانها اللي في النسخة. متأكد؟')) return
       const data = await importBackup(new Uint8Array(await f.arrayBuffer()))
-      toast(`تم الاسترجاع: ${data.sessions.length} تمرين، ${data.inbody.length} قياس${data.life ? `، ${data.life.tasks.length} مهمة، ${data.life.projects.length} مشروع` : ''}`)
+      toast(`تم الاسترجاع: ${data.sessions.length} تمرين، ${data.inbody.length} قياس`)
     })
 
   const requestPersist = () =>
@@ -93,28 +92,15 @@ export function SettingsScreen() {
 
   const wipe = () =>
     safe(async () => {
-      if (!confirm('هتمسح كل حاجة: المهام والمشاريع والأهداف والتمارين والقياسات والفيديوهات. متأكد؟')) return
+      if (!confirm('هتمسح كل حاجة: التمارين والقياسات والفيديوهات. متأكد؟')) return
       if (!confirm('آخر تأكيد — مفيش رجوع. عملت نسخة احتياطية؟')) return
       await db.delete()
-      await lifeDb.delete()
       location.reload()
     })
 
   return (
     <div className="space-y-4">
       <PageTitle>الإعدادات</PageTitle>
-
-      <Link to="/settings/planner" className="glass flex items-center justify-between p-4">
-        <span>
-          <span className="block font-bold">التخطيط والتذكير</span>
-          <span className="block text-sm text-muted">ساعات اليوم، هامش الطوارئ، الأولويات، مستوى المتابعة، الإشعارات</span>
-        </span>
-        <span className="text-muted">←</span>
-      </Link>
-      <div className="grid grid-cols-2 gap-2">
-        <Link to="/data" className="glass p-3 text-sm font-semibold">Claude والبيانات ←</Link>
-        <Link to="/trash" className="glass p-3 text-sm font-semibold">سلة المحذوفات ←</Link>
-      </div>
 
       {!isStandalone() && (
         <Banner tone="warn">
@@ -125,8 +111,8 @@ export function SettingsScreen() {
       <Card className="space-y-3">
         <h2 className="font-bold">النسخة الاحتياطية</h2>
         <p className="text-sm text-muted">
-          الداتا متخزنة على الموبايل بس. النسخة بتشمل Life OS (المهام والمشاريع والأهداف والمرفقات) والجيم. اعملها كل أسبوعين واحفظها على iCloud Drive.
-          {counts && <> عندك {counts.tasks} مهمة، {counts.projects} مشروع، {counts.sessions} تمرين، {counts.inbody} قياس InBody، {counts.media} فيديو.</>}
+          الداتا متخزنة على الموبايل بس. اعمل نسخة كل أسبوعين واحفظها على iCloud Drive.
+          {counts && <> عندك {counts.sessions} تمرين، {counts.inbody} قياس InBody، {counts.media} فيديو.</>}
         </p>
         <p className="text-sm">آخر نسخة: {lastBackupAt ? fmtDateLong(lastBackupAt) : <span className="text-warn">لسه معملتش</span>}</p>
         <div className="flex gap-2">
@@ -185,7 +171,7 @@ ${diag.caches.map((c) => `${c.name}: ${c.entries}`).join('\n') || 'no caches'}`}
       </Card>
 
       <Card className="space-y-2">
-        <h2 className="font-bold">برنامج الجيم</h2>
+        <h2 className="font-bold">البرنامج</h2>
         <Button variant="soft" className="w-full" onClick={resetProgram}>رجّع البرنامج الافتراضي</Button>
       </Card>
 
@@ -195,7 +181,7 @@ ${diag.caches.map((c) => `${c.name}: ${c.entries}`).join('\n') || 'no caches'}`}
       </Card>
 
       <p className="pb-4 text-center text-xs text-muted">
-        ELSYYAAD Life OS v{__APP_VERSION__} • صور التمارين من free-exercise-db (Public Domain) • التطبيق مش بديل عن رأي دكتور
+        جيمي v{__APP_VERSION__} • صور التمارين من free-exercise-db (Public Domain) • التطبيق مش بديل عن رأي دكتور
       </p>
     </div>
   )

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { finishTask, markHabit, pauseTimer, saveDayLog, startTimer, updateTask } from '../db/repo'
+import { finishTask, getKV, KV, markHabit, pauseTimer, saveDayLog, startTimer, updateTask } from '../db/repo'
 import { LOW_OUTPUT_LABEL } from '../domain/analytics'
 import { habitStats, isScheduled } from '../domain/habits'
 import { isOpen, remainingMinutes } from '../domain/priority'
@@ -9,9 +9,6 @@ import { currentAndNext, diffPlans } from '../domain/scheduler'
 import { at, fmtMinutes, hhmm, minuteOfDay, startOfWeek, addDays } from '../domain/time'
 import type { LowOutputReason, PlanBlock, Task } from '../domain/types'
 import { useLife } from '../state'
-import { db as gymDb } from '../../db/db'
-import { getActiveProgram, getSetting, lastCompletedSession, SETTING } from '../../db/repo'
-import { nextDayId } from '../../domain/rotation'
 import { useNow } from '../../lib/hooks'
 import { useSafe, useToast } from '../../ui/Toast'
 import { Button } from '../../ui/primitives'
@@ -235,7 +232,6 @@ export function Home() {
 
       <BackupNudge />
       <HabitsToday />
-      <GymCard />
       <DayReview />
 
       <SearchSheet open={search} onClose={() => setSearch(false)} />
@@ -315,28 +311,6 @@ function HabitsToday() {
   )
 }
 
-function GymCard() {
-  const info = useLiveQuery(async () => {
-    const program = await getActiveProgram()
-    if (!program) return null
-    const last = await lastCompletedSession()
-    const open = await gymDb.sessions.filter((s) => !s.finishedAt).first()
-    const id = open?.dayId ?? nextDayId(program.days.map((d) => d.id), last?.dayId)
-    return { name: program.days.find((d) => d.id === id)?.name ?? id, open: !!open }
-  }, [])
-  if (!info) return null
-  return (
-    <Link to="/gym" className="glass flex items-center gap-3 p-4">
-      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent2/15 text-accent2">{LI.dumbbell()}</span>
-      <span className="flex-1">
-        <span className="block text-xs text-muted">الصحة والجيم</span>
-        <span className="font-semibold">{info.open ? `تمرين مفتوح: ${info.name}` : `التمرين الجاي: ${info.name}`}</span>
-      </span>
-      <span className="text-muted">{LI.back('h-5 w-5 rotate-180')}</span>
-    </Link>
-  )
-}
-
 function DayReview() {
   const { data, today, now } = useLife()
   const safe = useSafe()
@@ -383,7 +357,7 @@ const BACKUP_DAYS = 14
 
 function BackupNudge() {
   const { data, now } = useLife()
-  const last = useLiveQuery(() => getSetting<number>(SETTING.lastBackupAt), [])
+  const last = useLiveQuery(() => getKV<number>(KV.lastLifeBackupAt), [])
   const hasData = data.tasks.length + data.projects.length >= 5
   if (!hasData || (last && now - last < BACKUP_DAYS * 86_400_000)) return null
   return (

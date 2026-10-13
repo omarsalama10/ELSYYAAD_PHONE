@@ -1,0 +1,12 @@
+// Cloudflare deploy config for ELSYYAAD Life OS (separate Worker from the gym app).
+// Build: npm run build:life   Deploy: npx wrangler deploy -c wrangler.life.jsonc
+{
+  "name": "elsyyaad-life",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./dist-life",
+    "not_found_handling": "single-page-application",
+    // Serve /index.html directly (no redirect to /) so the service worker precache never stores a redirect.
+    "html_handling": "none"
+  }
+}

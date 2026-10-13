@@ -3,13 +3,8 @@ import { BACKUP_VERSION, validateBackup, type BackupData, type MediaMeta, type P
 import type { Media, ProgressPhoto } from '../domain/types'
 import { db } from './db'
 import { SETTING } from './repo'
-import { loadAll, replaceAll } from '../life/db/repo'
-import { lifeDb } from '../life/db/db'
-import { validateLifeData, type LifeData } from '../life/domain/data'
 
 const DATA_FILE = 'data.json'
-/** Life OS data travels in the same zip; older backups without it leave Life OS untouched. */
-const LIFE_FILE = 'life.json'
 
 /** Zip with data.json + media/<id> blobs. Records the export time for the reminder. */
 export async function exportBackup(now = Date.now()): Promise<Uint8Array> {
@@ -34,16 +29,13 @@ export async function exportBackup(now = Date.now()): Promise<Uint8Array> {
   }
   const data: BackupData = { version: BACKUP_VERSION, exportedAt: now, programs, sessions, sets, inbody, tape, settings, media: mediaMeta, checkins, foods, meals, days, weights, photos: photoMeta }
   files[DATA_FILE] = strToU8(JSON.stringify(data))
-  const life = await loadAll(now)
-  for (const a of await lifeDb.attachments.toArray()) files[`life-media/${a.id}`] = [new Uint8Array(await a.blob.arrayBuffer()), { level: 0 }]
-  files[LIFE_FILE] = strToU8(JSON.stringify(life))
   const zip = zipSync(files)
   await db.settings.put({ key: SETTING.lastBackupAt, value: now })
   return zip
 }
 
 /** Validates fully before touching data, then replaces everything in one transaction. */
-export async function importBackup(bytes: Uint8Array): Promise<BackupData & { life?: LifeData }> {
+export async function importBackup(bytes: Uint8Array): Promise<BackupData> {
   let files: Record<string, Uint8Array>
   try {
     files = unzipSync(bytes)
@@ -71,21 +63,6 @@ export async function importBackup(bytes: Uint8Array): Promise<BackupData & { li
     return { id: p.id, date: p.date, pose: p.pose, mime: p.mime, at: p.at, blob: new Blob([bytes], { type: p.mime }) }
   })
 
-  let life: LifeData | undefined
-  let lifeBlobs: Map<string, Blob> | undefined
-  if (files[LIFE_FILE]) {
-    try {
-      life = validateLifeData(JSON.parse(strFromU8(files[LIFE_FILE])))
-    } catch (e) {
-      throw e instanceof SyntaxError ? new Error('life.json تالف') : e
-    }
-    lifeBlobs = new Map(life.attachments.map((a) => {
-      const bytes = files[a.file]
-      if (!bytes) throw new Error(`مرفق ناقص في النسخة: ${a.name}`)
-      return [a.file, new Blob([bytes], { type: a.mime })]
-    }))
-  }
-
   const tables = [db.photos, db.programs, db.sessions, db.sets, db.inbody, db.tape, db.settings, db.media, db.checkins, db.foods, db.meals, db.days, db.weights]
   await db.transaction('rw', tables, async () => {
     await Promise.all(tables.map((t) => t.clear()))
@@ -103,7 +80,5 @@ export async function importBackup(bytes: Uint8Array): Promise<BackupData & { li
     await db.weights.bulkAdd(data.weights)
     await db.photos.bulkAdd(photos)
   })
-  if (!life) return data
-  await replaceAll(life, lifeBlobs)
-  return { ...data, life }
+  return data
 }

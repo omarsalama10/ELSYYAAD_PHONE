@@ -147,13 +147,14 @@ test('goals, habits, focus mode, insights and trash', async ({ page }) => {
   await expect(page.getByTestId('metric-execution')).toBeVisible()
 })
 
-test('gym module is reachable and keeps its own tabs', async ({ page }) => {
-  await page.goto('./#/more')
-  await page.getByRole('link', { name: /الصحة والجيم/ }).click()
-  await expect(page.getByRole('button', { name: /ابدأ يوم/ })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'الجسم' })).toBeVisible()
-  await page.getByRole('link', { name: 'Life OS' }).click()
+test('Life OS is its own app: own title, no gym screens', async ({ page }) => {
+  await page.goto('./')
+  await expect(page).toHaveTitle('ELSYYAAD Life OS')
   await expect(page.getByRole('link', { name: 'المشاريع' })).toBeVisible()
+  await page.goto('./#/more')
+  await expect(page.getByText('الصحة والجيم')).toHaveCount(0)
+  const manifest = await (await page.request.get('./manifest.webmanifest')).json()
+  expect(manifest.short_name).toBe('Life OS')
 })
 
 test('a missed session offers a re-plan with a diff, and approving clears it', async ({ page }) => {

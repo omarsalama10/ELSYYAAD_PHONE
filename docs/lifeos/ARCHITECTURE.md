@@ -1,7 +1,11 @@
 # ELSYYAAD Life OS — Architecture
 
 Personal life operating system. iPhone PWA, Arabic/RTL, offline-first, no server.
-Version 2.0.0 (the gym tracker from 1.x lives on as the health module).
+
+It is a **separate app** from the gym tracker in the same repository: built with `VITE_APP=life`
+(`npm run build:life` → `dist-life/`, static files from `public-life/`, entry `src/life/LifeApp.tsx`
+via the `@app` alias) and deployed as its own Cloudflare Worker (`wrangler.life.jsonc`). Separate
+origin means separate storage, icon, backups and updates; the two apps share only UI primitives.
 
 ## 1. Layers
 
@@ -27,8 +31,8 @@ src/life/
   screens/     one file per screen
 ```
 
-The gym tracker keeps its own database (`gym-tracker`) and code in `src/screens`, `src/db`, `src/domain`.
-Both databases travel in the same zip backup.
+The gym tracker is untouched (`src/screens`, `src/db`, `src/domain`, database `gym-tracker`).
+Life OS backups are their own zip (`life.json` + `life-media/*`, `src/life/db/backup.ts`).
 
 ## 2. Data model (summary)
 

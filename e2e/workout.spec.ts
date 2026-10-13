@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('first run → Day A → log sets → finish → next is Day B', async ({ page }) => {
-  await page.goto('./#/gym')
+  await page.goto('./')
   await expect(page.getByRole('button', { name: 'ابدأ يوم A' })).toBeVisible()
   await page.getByRole('button', { name: 'ابدأ يوم A' }).click()
 
@@ -32,13 +32,13 @@ test('first run → Day A → log sets → finish → next is Day B', async ({ p
   await page.getByRole('button', { name: 'تخطي' }).click()
 
   await page.getByRole('button', { name: 'إنهاء', exact: true }).click()
-  await expect(page).toHaveURL(/#\/gym$/)
+  await expect(page).toHaveURL(/#\/$/)
   await expect(page.getByRole('button', { name: 'ابدأ يوم B' })).toBeVisible()
   await expect(page.getByText('1/3 الأسبوع ده')).toBeVisible()
 })
 
 test('unilateral exercise shows left/right rows and suggestion uses history', async ({ page }) => {
-  await page.goto('./#/gym')
+  await page.goto('./')
   await page.getByRole('button', { name: 'ابدأ يوم A' }).click()
   const card = page.getByTestId('card-A-main-5')
   await card.getByRole('button', { expanded: false }).click()
@@ -47,7 +47,7 @@ test('unilateral exercise shows left/right rows and suggestion uses history', as
 })
 
 test('workouts list → day detail → start workout', async ({ page }) => {
-  await page.goto('./#/gym')
+  await page.goto('./')
   await page.getByRole('link', { name: 'التمارين' }).click()
   await page.getByTestId('day-B').click()
   await expect(page.getByRole('heading', { name: 'يوم B' })).toBeVisible()
@@ -59,7 +59,7 @@ test('workouts list → day detail → start workout', async ({ page }) => {
 })
 
 test('home quick action opens the InBody form', async ({ page }) => {
-  await page.goto('./#/gym')
+  await page.goto('./')
   await page.getByRole('link', { name: 'سجّل InBody' }).click()
   await expect(page.getByLabel('الوزن', { exact: true })).toBeVisible()
 })

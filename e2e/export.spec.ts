@@ -17,7 +17,7 @@ test('CSV export zip contains sets and sessions', async ({ page }) => {
   await r.getByLabel('عدة').fill('10')
   await r.getByRole('button', { name: 'تمت المجموعة' }).click()
   await page.getByRole('button', { name: 'إنهاء', exact: true }).click()
-  await expect(page).toHaveURL(/#\/gym$/)
+  await expect(page).toHaveURL(/#\/$/)
 
   await page.goto('./#/settings')
   const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'CSV + JSON' }).click()])

@@ -1,5 +1,5 @@
 {
-  "name": "elsyyaad-life-os",
+  "name": "elsyyaad-phone",
   "private": true,
   "version": "2.0.0",
   "type": "module",
@@ -11,9 +11,13 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
-    "check": "npm run typecheck && npm test && npm run build && npm run e2e",
+    "check": "npm run typecheck && npm test && npm run build:all && npm run e2e",
     "catalog": "node scripts/build-catalog.mjs && node scripts/optimize-images.mjs",
-    "icons": "node scripts/build-icons.mjs"
+    "icons": "node scripts/build-icons.mjs public && node scripts/build-icons.mjs public-life",
+    "build:life": "tsc -b && VITE_APP=life vite build",
+    "build:all": "npm run build && npm run build:life",
+    "dev:life": "VITE_APP=life vite",
+    "preview:life": "VITE_APP=life vite preview --port 4174 --strictPort"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans-arabic": "^5.3.0",
