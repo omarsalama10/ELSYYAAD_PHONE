@@ -336,6 +336,9 @@ export interface LifeSettings {
   minChunkMin: number
   /** Cap on deep-work minutes per day. */
   maxDeepMinPerDay: number
+  /** Optional window (minutes of day) where deep work may be placed, e.g. 11:30–15:00. */
+  deepStartMin?: number
+  deepEndMin?: number
   /** Rough estimates are multiplied by this when planning. */
   roughFactor: number
   defaultEstimateMin: number

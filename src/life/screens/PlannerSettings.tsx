@@ -69,6 +69,14 @@ export function PlannerSettings() {
           {num('defaultSessionMin', 'أقصى جلسة (د)', 'المهام الأطول بتتقسم')}
           {num('minChunkMin', 'أصغر جلسة (د)')}
           {num('maxDeepMinPerDay', 'أقصى تركيز عميق/يوم (د)')}
+          <Field label="التركيز العميق من" hint="فاضي = أي وقت في اليوم">
+            <input type="time" aria-label="بداية التركيز العميق" className="ltr w-full" value={s.deepStartMin === undefined ? '' : toTimeInput(s.deepStartMin)}
+              onChange={(e) => set({ deepStartMin: e.target.value ? fromTimeInput(e.target.value) : undefined, ...(e.target.value ? {} : { deepEndMin: undefined }) })} />
+          </Field>
+          <Field label="لحد">
+            <input type="time" aria-label="نهاية التركيز العميق" className="ltr w-full" value={s.deepEndMin === undefined ? '' : toTimeInput(s.deepEndMin)}
+              onChange={(e) => set({ deepEndMin: e.target.value ? fromTimeInput(e.target.value) : undefined })} />
+          </Field>
           {num('defaultEstimateMin', 'مدة افتراضية (د)', 'للمهام بدون تقدير')}
           {num('roughFactor', 'معامل التقدير التقريبي', 'مثلًا 1.25 = +25%')}
           {num('planHorizonDays', 'أفق التخطيط (أيام)')}

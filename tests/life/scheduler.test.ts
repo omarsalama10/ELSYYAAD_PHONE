@@ -122,6 +122,24 @@ describe('plan', () => {
     expect(parts.reduce((x, y) => x + y, 0)).toBe(60)
   })
 
+  it('keeps deep work inside the deep-work window', () => {
+    const deep = task({ id: 'd', estimateMin: 60, energy: 'deep' })
+    const light = task({ id: 'l', estimateMin: 60, energy: 'routine', importance: 1 })
+    const s = { ...S, deepStartMin: 14 * 60, deepEndMin: 16 * 60 }
+    const r = plan({ tasks: [deep, light], commitments: [], settings: s, now: time(9), days: 1 })
+    expect(r.blocks.find((b) => b.taskId === 'd')).toMatchObject({ startMin: 840, endMin: 900 })
+    expect(r.blocks.find((b) => b.taskId === 'l')).toMatchObject({ startMin: 540 })
+  })
+
+  it('a deadline beyond the horizon is not "at risk" just because the horizon is full', () => {
+    const s = { ...S, dayStartMin: 9 * 60, dayEndMin: 10 * 60 }
+    const far = task({ id: 'far', estimateMin: 600, dueAt: time(12, 0, addDays(MON, 30)) })
+    const near = task({ id: 'near', estimateMin: 600, dueAt: time(12, 0, addDays(MON, 1)) })
+    const r = plan({ tasks: [far, near], commitments: [], settings: s, now: time(9), days: 3 })
+    expect(r.unscheduled.map((u) => u.taskId).sort()).toEqual(['far', 'near'])
+    expect(r.atRisk.map((x) => x.taskId)).toEqual(['near'])
+  })
+
   it('is deterministic', () => {
     const ts = [task({ id: 'a', estimateMin: 45 }), task({ id: 'b', estimateMin: 45 }), task({ id: 'c', estimateMin: 45, importance: 5 })]
     const a = plan({ tasks: ts, commitments: [], settings: S, now: time(9), days: 1 })

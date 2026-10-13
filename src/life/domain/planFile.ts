@@ -384,6 +384,8 @@ export function previewPlanFile(raw: unknown, data: ExistingData, opt: { now: nu
       setIf(s, 'quietEndMin', c.time(o, 'quietEnd', 'settings'))
       setIf(s, 'morningSummaryMin', c.time(o, 'morningSummary', 'settings'))
       setIf(s, 'eveningReviewMin', c.time(o, 'eveningReview', 'settings'))
+      setIf(s, 'deepStartMin', c.time(o, 'deepStart', 'settings'))
+      setIf(s, 'deepEndMin', c.time(o, 'deepEnd', 'settings'))
       setIf(s, 'bufferPct', c.num(o, 'bufferPct', 'settings', 0, 0.5, false))
       setIf(s, 'gapMin', c.num(o, 'gapMin', 'settings', 0, 120))
       setIf(s, 'defaultSessionMin', c.num(o, 'defaultSessionMin', 'settings', 15, 480))
@@ -393,6 +395,7 @@ export function previewPlanFile(raw: unknown, data: ExistingData, opt: { now: nu
       setIf(s, 'accountability', c.oneOf(o, 'accountability', 'settings', ['calm', 'balanced', 'firm'] as const))
       if (o.restWeekdays !== undefined) { const w = Array.isArray(o.restWeekdays) && o.restWeekdays.length === 0 ? [] : c.weekdays(o.restWeekdays, 'settings.restWeekdays'); if (w) s.restWeekdays = w }
       if (s.dayEndMin <= s.dayStartMin) c.err('settings', 'dayEnd لازم يكون بعد dayStart')
+      if (s.deepStartMin !== undefined && s.deepEndMin !== undefined && s.deepEndMin <= s.deepStartMin) c.err('settings', 'deepEnd لازم يكون بعد deepStart')
       const fields = diff(data.settings, s, Object.keys(s))
       if (fields.length) push({ entity: 'settings', action: 'update', id: 'settings', title: 'الإعدادات', fields, record: s })
     }

@@ -173,7 +173,11 @@ export function plan(input: PlanInput): PlanResult {
         // First slot that yields a valid piece: the whole remainder, or a piece ≥ minChunk that
         // also leaves ≥ minChunk behind (no 5-minute leftovers).
         let pick: { slot: Interval; start: number; chunk: number } | undefined
-        for (const slot of slots) {
+        // Deep work only inside the configured deep-work window (if any).
+        const usable = isDeep && s.deepStartMin !== undefined && s.deepEndMin !== undefined && s.deepEndMin > s.deepStartMin
+          ? subtractIntervals(slots, [[0, s.deepStartMin], [s.deepEndMin, 1440]])
+          : slots
+        for (const slot of usable) {
           const start = Math.max(slot[0], minStart)
           const len = Math.min(left, session, slot[1] - start, cap)
           if (len <= 0) continue
@@ -184,7 +188,8 @@ export function plan(input: PlanInput): PlanResult {
           break
         }
         if (!pick) break
-        const { slot, start, chunk } = pick
+        const { start, chunk } = pick
+        const slot = slots.find(([a, b]) => a <= start && start < b)!
         placed.push({ id: `t:${t.id}:${day}:${start}`, day, startMin: start, endMin: start + chunk, kind: 'task', title: t.title, taskId: t.id, confidence: t.confidence })
         slots = subtractIntervals(slots, [[start, Math.min(slot[1], start + chunk + s.gapMin)]])
         free.set(day, slots)
@@ -212,7 +217,8 @@ export function plan(input: PlanInput): PlanResult {
     if (!isOpen(t) || t.dueAt === undefined) continue
     const end = failed.has(t.id) ? undefined : finishAt[t.id]
     if (end === undefined) {
-      if (t.dueAt < horizonEnd || failed.has(t.id)) atRisk.push({ taskId: t.id, dueAt: t.dueAt, kind: 'unscheduled' })
+      // Only a deadline inside the horizon is at risk; later ones just wait for future capacity.
+      if (t.dueAt < horizonEnd) atRisk.push({ taskId: t.id, dueAt: t.dueAt, kind: 'unscheduled' })
       continue
     }
     const lateMin = Math.round((end - t.dueAt) / 60_000)

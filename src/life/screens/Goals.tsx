@@ -145,12 +145,24 @@ export function GoalDetail() {
 
       {g.metric.type === 'numeric' && (() => {
         const m = g.metric
+        const setNum = (k: 'start' | 'current' | 'target', v: string) => {
+          const n = Number(v.replace(/[,،\s]/g, ''))
+          if (v.trim() !== '' && Number.isFinite(n) && n !== m[k]) void safe(() => updateGoal(g.id, { metric: { ...m, [k]: n } }, k === 'current' ? 'تحديث القياس' : 'تعديل نقطة البداية أو المستهدف'))
+        }
         return (
-          <div className="glass flex items-center gap-3 p-4">
-            <span className="flex-1 text-sm">الرقم الحالي ({m.unit || 'وحدة'}) من {m.target}</span>
-            <button type="button" aria-label="نقص" className="h-9 w-9 rounded-xl bg-white/70" onClick={() => void safe(() => updateGoal(g.id, { metric: { ...m, current: m.current - 1 } }, 'تحديث القياس'))}>−</button>
-            <span className="w-12 text-center text-lg font-bold num">{m.current}</span>
-            <button type="button" aria-label="زوّد" className="h-9 w-9 rounded-xl bg-accent text-white" onClick={() => void safe(() => updateGoal(g.id, { metric: { ...m, current: m.current + 1 } }, 'تحديث القياس'))}>+</button>
+          <div className="glass space-y-3 p-4" data-testid="goal-metric">
+            <div className="flex items-center gap-3">
+              <span className="flex-1 text-sm">الرقم الحالي ({m.unit || 'وحدة'})</span>
+              <button type="button" aria-label="نقص" className="h-9 w-9 rounded-xl bg-white/70" onClick={() => void safe(() => updateGoal(g.id, { metric: { ...m, current: m.current - 1 } }, 'تحديث القياس'))}>−</button>
+              <span className="min-w-12 text-center text-lg font-bold num">{m.current.toLocaleString('en')}</span>
+              <button type="button" aria-label="زوّد" className="h-9 w-9 rounded-xl bg-accent text-white" onClick={() => void safe(() => updateGoal(g.id, { metric: { ...m, current: m.current + 1 } }, 'تحديث القياس'))}>+</button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <Field label="البداية"><CommitText ariaLabel="قيمة البداية" className="ltr" value={String(m.start)} onCommit={(v) => setNum('start', v)} /></Field>
+              <Field label="الحالي"><CommitText ariaLabel="القيمة الحالية" className="ltr" value={String(m.current)} onCommit={(v) => setNum('current', v)} /></Field>
+              <Field label="المستهدف"><CommitText ariaLabel="القيمة المستهدفة" className="ltr" value={String(m.target)} onCommit={(v) => setNum('target', v)} /></Field>
+            </div>
+            <p className="text-[11px] text-muted">اكتب الرقم الحالي كل أسبوع في المراجعة الأسبوعية؛ التقدم = (الحالي − البداية) ÷ (المستهدف − البداية).</p>
           </div>
         )
       })()}
