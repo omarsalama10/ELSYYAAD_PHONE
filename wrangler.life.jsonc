@@ -3,6 +3,8 @@
 {
   "name": "elsyyaad-life",
   "compatibility_date": "2025-09-01",
+  // Public URL https://elsyyaad-life.<account>.workers.dev (new Workers start with it off).
+  "workers_dev": true,
   "assets": {
     "directory": "./dist-life",
     "not_found_handling": "single-page-application",
