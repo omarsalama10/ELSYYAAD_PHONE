@@ -5,12 +5,12 @@ import { finishTask, markHabit, pauseTimer, saveDayLog, startTimer, updateTask }
 import { LOW_OUTPUT_LABEL } from '../domain/analytics'
 import { habitStats, isScheduled } from '../domain/habits'
 import { isOpen, remainingMinutes } from '../domain/priority'
-import { currentAndNext } from '../domain/scheduler'
+import { currentAndNext, diffPlans } from '../domain/scheduler'
 import { at, fmtMinutes, hhmm, minuteOfDay, startOfWeek, addDays } from '../domain/time'
 import type { LowOutputReason, PlanBlock, Task } from '../domain/types'
 import { useLife } from '../state'
 import { db as gymDb } from '../../db/db'
-import { getActiveProgram, lastCompletedSession } from '../../db/repo'
+import { getActiveProgram, getSetting, lastCompletedSession, SETTING } from '../../db/repo'
 import { nextDayId } from '../../domain/rotation'
 import { useNow } from '../../lib/hooks'
 import { useSafe, useToast } from '../../ui/Toast'
@@ -46,6 +46,7 @@ export function Home() {
   const { current, next } = currentAndNext(blocks, now)
   const running = life.runningTaskId ? taskById.get(life.runningTaskId) : undefined
   const missed = taskBlocks.filter((b) => life.blockState(b) === 'missed')
+  const newSinceApproval = approved ? diffPlans(taskBlocks, proposal.blocks.filter((b) => b.day === today && b.taskId)).filter((c) => c.type === 'added') : []
   const cap = proposal.capacity[0]!
   const plannedMin = taskBlocks.reduce((a, b) => a + b.endMin - b.startMin, 0)
   const doneMin = taskBlocks.filter((b) => life.blockState(b) === 'done').reduce((a, b) => a + b.endMin - b.startMin, 0)
@@ -132,10 +133,13 @@ export function Home() {
           <Chip tone="warn">اعتمد</Chip>
         </button>
       )}
-      {approved && (missed.length > 0 || cap.freeMin === 0) && (
+      {approved && (missed.length > 0 || newSinceApproval.length > 0) && (
         <button type="button" onClick={() => setReview(true)} className="glass flex w-full items-center gap-3 p-3.5 text-right" data-testid="replan">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-danger/10 text-danger">{LI.repeat('h-5 w-5')}</span>
-          <span className="flex-1 text-sm"><b>{missed.length} جلسة عدّت من غير ما تخلص</b><br /><span className="text-muted">اعرض أفضل إعادة توزيع (محليًا، من غير نت)</span></span>
+          <span className="flex-1 text-sm">
+            <b>{missed.length > 0 ? `${missed.length} جلسة عدّت من غير ما تخلص` : `${newSinceApproval.length} مهام جديدة مش في الخطة المعتمدة`}</b><br />
+            <span className="text-muted">اعرض أفضل إعادة توزيع (محليًا، من غير نت)</span>
+          </span>
           <Chip tone="danger">أعد الجدولة</Chip>
         </button>
       )}
@@ -229,6 +233,7 @@ export function Home() {
         </Section>
       )}
 
+      <BackupNudge />
       <HabitsToday />
       <GymCard />
       <DayReview />
@@ -371,5 +376,19 @@ function DayReview() {
         </label>
       </div>
     </Section>
+  )
+}
+
+const BACKUP_DAYS = 14
+
+function BackupNudge() {
+  const { data, now } = useLife()
+  const last = useLiveQuery(() => getSetting<number>(SETTING.lastBackupAt), [])
+  const hasData = data.tasks.length + data.projects.length >= 5
+  if (!hasData || (last && now - last < BACKUP_DAYS * 86_400_000)) return null
+  return (
+    <Link to="/settings" className="block rounded-2xl bg-warn/10 p-3 text-sm text-warn">
+      {last ? `آخر نسخة احتياطية من أكتر من ${BACKUP_DAYS} يوم` : 'لسه معملتش نسخة احتياطية'} — البيانات على الموبايل بس. اضغط واحفظ نسخة على iCloud.
+    </Link>
   )
 }

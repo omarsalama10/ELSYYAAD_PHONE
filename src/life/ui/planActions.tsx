@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { approvePlan, finishTask, pauseTimer, postponeTask, startTimer, toggleCommitmentSkip, updateTask } from '../db/repo'
-import { remainingMinutes } from '../domain/priority'
+import { isOpen, remainingMinutes } from '../domain/priority'
 import { diffPlans } from '../domain/scheduler'
-import { addDays, fmtMinutes, hhmm } from '../domain/time'
+import { addDays, fmtMinutes, hhmm, minuteOfDay } from '../domain/time'
 import type { DayKey, PlanBlock, Task } from '../domain/types'
 import { useLife } from '../state'
 import { Button } from '../../ui/primitives'
@@ -29,7 +29,13 @@ export function usePlanActions() {
   }
 
   return {
-    approve: async (days: DayKey[], reason?: string) => approvePlan(proposal.blocks, days, reason),
+    /** Keeps today's blocks that already ended (history) and takes the proposal from now on. */
+    approve: async (days: DayKey[], reason?: string) => {
+      const nowMin = minuteOfDay(life.now)
+      // Only finished work stays; missed sessions are replaced by the new proposal (otherwise they'd stay "missed").
+      const past = (approved.get(life.today)?.blocks ?? []).filter((b) => b.kind !== 'commitment' && b.endMin <= nowMin && b.taskId && life.taskById.get(b.taskId) && !isOpen(life.taskById.get(b.taskId)!))
+      await approvePlan([...past, ...proposal.blocks.filter((b) => b.kind !== 'commitment')], days, reason)
+    },
     moveBlock: async (b: PlanBlock, startMin: number, day: DayKey = b.day) => {
       if (!b.taskId) return
       const t = life.taskById.get(b.taskId)

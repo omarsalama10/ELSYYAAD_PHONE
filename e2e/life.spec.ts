@@ -153,3 +153,20 @@ test('gym module is reachable and keeps its own tabs', async ({ page }) => {
   await page.getByRole('link', { name: 'Life OS' }).click()
   await expect(page.getByRole('link', { name: 'المشاريع' })).toBeVisible()
 })
+
+test('a missed session offers a re-plan with a diff, and approving clears it', async ({ page }) => {
+  await page.goto('./')
+  await quickAdd(page, 'مراجعة العقد 30د')
+  await page.getByText('خطة اليوم مقترحة').click()
+  await page.getByRole('button', { name: /اعتمد خطة/ }).click()
+
+  // 11:00 — the 10:00 session ended and the task is still open.
+  await page.clock.setFixedTime(new Date(2026, 9, 12, 11, 0, 0))
+  await page.reload()
+  await expect(page.getByTestId('replan')).toContainText('جلسة عدّت')
+  await page.getByTestId('replan').click()
+  await expect(page.getByTestId('plan-changes')).toContainText('مراجعة العقد')
+  await page.getByRole('button', { name: /اعتمد التغييرات/ }).click()
+  await expect(page.getByTestId('replan')).toHaveCount(0)
+  await expect(page.getByTestId(`timeline-${TODAY}`).getByRole('button', { name: /مراجعة العقد 11:00/ })).toBeVisible()
+})
