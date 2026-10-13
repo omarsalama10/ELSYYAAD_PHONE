@@ -54,6 +54,15 @@ export function PlannerSettings() {
               ))}
             </div>
           </div>
+          <div className="space-y-1">
+            <span className="text-xs font-semibold text-muted">شكل الساعة</span>
+            <div className="grid grid-cols-2 gap-1.5">
+              {([['12h', '12 ساعة (2:30 م)'], ['24h', '24 ساعة (14:30)']] as const).map(([c, label]) => (
+                <button key={c} type="button" aria-pressed={s.clock === c} onClick={() => set({ clock: c })}
+                  className={`h-10 rounded-xl text-sm ${s.clock === c ? 'bg-ink text-white' : 'bg-white/70 text-muted'}`}>{label}</button>
+              ))}
+            </div>
+          </div>
           <Field label="أول يوم في الأسبوع">
             <select className="w-full" value={s.weekStartsOn} onChange={(e) => set({ weekStartsOn: Number(e.target.value) })}>
               {[6, 0, 1].map((d) => <option key={d} value={d}>{WEEKDAY_NAMES[d]}</option>)}

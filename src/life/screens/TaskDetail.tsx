@@ -9,13 +9,13 @@ import {
 import { isOpen, priorityLabel, remainingMinutes, wouldCreateCycle } from '../domain/priority'
 import { describeRecurrence } from '../domain/recurrence'
 import { suggestEstimate } from '../domain/text'
-import { at, dayKey, fmtMinutes, hhmm, minuteOfDay } from '../domain/time'
+import { at, dayKey, fmtMinutes, minuteOfDay } from '../domain/time'
 import type { Attachment, Confidence, Energy, Recurrence, Task, TaskEvent, TaskStatus, TimeKind } from '../domain/types'
 import { useLife } from '../state'
 import { useNow, useObjectUrl } from '../../lib/hooks'
 import { Button } from '../../ui/primitives'
 import { useSafe, useToast } from '../../ui/Toast'
-import { ENERGY_LABEL, fmtWhen, fromTimeInput, STATUS_LABEL, toTimeInput, WEEKDAY_NAMES, WEEKDAY_SHORT } from '../ui/format'
+import { ENERGY_LABEL, fmtDateTime, fmtTime, fmtWhen, fromTimeInput, STATUS_LABEL, toTimeInput, WEEKDAY_NAMES, WEEKDAY_SHORT } from '../ui/format'
 import { LI } from '../ui/icons'
 import { Bar, Chip, CommitText, Empty, Field, Header, Section, Sheet, Toggle } from '../ui/kit'
 import { usePlanActions } from '../ui/planActions'
@@ -397,14 +397,14 @@ const FIELD_LABEL: Record<string, string> = {
 function fmtVal(field: string | undefined, v: unknown): string {
   if (v === undefined || v === null) return '—'
   if (field === 'status') return STATUS_LABEL[v as TaskStatus] ?? String(v)
-  if (field === 'dueAt' && typeof v === 'number') return new Date(v).toLocaleString('ar-EG-u-nu-latn', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-  if (field === 'pinned' && typeof v === 'object') { const p = v as { day: string; startMin: number }; return `${p.day} ${hhmm(p.startMin)}` }
+  if (field === 'dueAt' && typeof v === 'number') return fmtDateTime(v)
+  if (field === 'pinned' && typeof v === 'object') { const p = v as { day: string; startMin: number }; return `${p.day} ${fmtTime(p.startMin)}` }
   if (Array.isArray(v)) return `${v.length}`
   return String(v)
 }
 
 function EventLine({ e }: { e: TaskEvent }) {
-  const when = new Date(e.at).toLocaleString('ar-EG-u-nu-latn', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+  const when = fmtDateTime(e.at)
   let text: string
   switch (e.type) {
     case 'created': text = `اتعملت${e.text ? ` (${e.text})` : ''}`; break

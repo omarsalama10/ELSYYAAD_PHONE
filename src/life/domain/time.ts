@@ -61,6 +61,27 @@ export function hhmm(min: number): string {
   return `${pad(Math.floor(m / 60))}:${pad(m % 60)}`
 }
 
+export type ClockFormat = '12h' | '24h'
+
+/**
+ * Time of day for display. '12h' → "2:30 م" / "11:00 ص" (1440 = midnight shows as 12:00 ص);
+ * '24h' → "14:30". `compact` drops ":00" ("2 م") for axis labels. Data and plan files stay HH:mm.
+ */
+export function fmtClock(min: number, clock: ClockFormat = '12h', compact = false): string {
+  if (clock === '24h') return compact && min % 60 === 0 ? hhmm(min).slice(0, 2) : hhmm(min)
+  const m = ((Math.round(min) % 1440) + 1440) % 1440
+  const h = Math.floor(m / 60)
+  const mm = m % 60
+  return `${h % 12 || 12}${compact && mm === 0 ? '' : `:${pad(mm)}`} ${h < 12 ? 'ص' : 'م'}`
+}
+
+/** "2:00–5:30 م" when both ends share the period, else "10:30 م–12:00 ص". */
+export function fmtClockRange(from: number, to: number, clock: ClockFormat = '12h'): string {
+  const a = fmtClock(from, clock), b = fmtClock(to, clock)
+  if (clock === '24h') return `${a}–${b}`
+  return a.slice(-1) === b.slice(-1) ? `${a.slice(0, -2)}–${b}` : `${a}–${b}`
+}
+
 export function parseHHMM(s: string): number | undefined {
   const m = /^(\d{1,2}):(\d{2})$/.exec(s.trim())
   if (!m) return undefined

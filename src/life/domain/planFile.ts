@@ -400,6 +400,7 @@ export function previewPlanFile(raw: unknown, data: ExistingData, opt: { now: nu
       setIf(s, 'maxDeepMinPerDay', c.num(o, 'maxDeepMinPerDay', 'settings', 30, 960))
       setIf(s, 'planHorizonDays', c.num(o, 'planHorizonDays', 'settings', 1, 60))
       setIf(s, 'remindBeforeMin', c.num(o, 'remindBeforeMin', 'settings', 0, 240))
+      setIf(s, 'clock', c.oneOf(o, 'clock', 'settings', ['12h', '24h'] as const))
       setIf(s, 'accountability', c.oneOf(o, 'accountability', 'settings', ['calm', 'balanced', 'firm'] as const))
       if (o.restWeekdays !== undefined) { const w = Array.isArray(o.restWeekdays) && o.restWeekdays.length === 0 ? [] : c.weekdays(o.restWeekdays, 'settings.restWeekdays'); if (w) s.restWeekdays = w }
       if (s.dayEndMin <= s.dayStartMin) c.err('settings', 'dayEnd لازم يكون بعد dayStart')

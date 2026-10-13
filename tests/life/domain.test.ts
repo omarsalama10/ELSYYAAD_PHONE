@@ -7,7 +7,7 @@ import { matches, normalize, parseQuickAdd, suggestEstimate, toCSV } from '../..
 import { buildICS, fold } from '../../src/life/domain/ics'
 import { dayReminders, inQuietHours } from '../../src/life/domain/reminders'
 import { plan } from '../../src/life/domain/scheduler'
-import { addDays, at, diffDays, startOfWeek } from '../../src/life/domain/time'
+import { addDays, at, diffDays, fmtClock, fmtClockRange, startOfWeek } from '../../src/life/domain/time'
 import { newGoal, newHabit, newProject } from '../../src/life/domain/factory'
 import type { DayPlan, HabitLog, TaskEvent, TimeLog } from '../../src/life/domain/types'
 import { commitment, MON, settings, task, time } from './factory'
@@ -19,6 +19,19 @@ describe('time', () => {
     expect(startOfWeek(MON, 6)).toBe('2026-10-10') // Saturday
     expect(diffDays('2026-10-01', '2026-11-01')).toBe(31)
     expect(addDays('2026-12-31', 1)).toBe('2027-01-01')
+  })
+
+  it('formats times of day in 12h (ص/م) or 24h', () => {
+    expect(fmtClock(14 * 60 + 30)).toBe('2:30 م')
+    expect(fmtClock(11 * 60 + 30)).toBe('11:30 ص')
+    expect(fmtClock(12 * 60)).toBe('12:00 م')
+    expect(fmtClock(0)).toBe('12:00 ص')
+    expect(fmtClock(1440)).toBe('12:00 ص')
+    expect(fmtClock(16 * 60, '12h', true)).toBe('4 م')
+    expect(fmtClock(14 * 60 + 30, '24h')).toBe('14:30')
+    expect(fmtClockRange(16 * 60, 22 * 60)).toBe('4:00–10:00 م')
+    expect(fmtClockRange(22 * 60 + 30, 1440)).toBe('10:30 م–12:00 ص')
+    expect(fmtClockRange(9 * 60, 17 * 60, '24h')).toBe('09:00–17:00')
   })
 })
 
@@ -179,6 +192,10 @@ describe('reminders', () => {
     const firm = dayReminders({ day: MON, blocks: r.blocks, tasks: [t], commitments: [], settings: { ...S, accountability: 'firm' } })
     expect(calm.map((x) => x.kind)).toEqual(['morning', 'start', 'evening'])
     expect(firm.map((x) => x.kind)).toEqual(['morning', 'before_start', 'start', 'followup', 'overdue', 'evening'])
+    const start = calm.find((x) => x.kind === 'start')!
+    expect(start.body).toMatch(/^حتى \d{1,2}:\d{2} [صم]/)
+    const start24 = dayReminders({ day: MON, blocks: r.blocks, tasks: [t], commitments: [], settings: { ...S, accountability: 'calm', clock: '24h' } }).find((x) => x.kind === 'start')!
+    expect(start24.body).toMatch(/^حتى \d{2}:\d{2}/)
     expect(inQuietHours(23 * 60 + 45, S)).toBe(true)
     expect(inQuietHours(12 * 60, S)).toBe(false)
   })

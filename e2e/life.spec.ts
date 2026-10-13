@@ -54,8 +54,13 @@ test('commitments block time and dependencies order the plan', async ({ page }) 
   await quickAdd(page, 'تطوير الميزة 60د')
   const timeline = page.getByTestId(`timeline-${TODAY}`)
   await expect(timeline.getByRole('button', { name: /الشغل 10:00/ })).toBeVisible()
-  // Work can't overlap the commitment, so it starts at 14:00.
-  await expect(timeline.getByRole('button', { name: /تطوير الميزة 14:00/ })).toBeVisible()
+  // Work can't overlap the commitment, so it starts at 2 PM (12-hour clock is the default).
+  await expect(timeline.getByRole('button', { name: /تطوير الميزة 2:00 م/ })).toBeVisible()
+
+  await page.goto('./#/settings/planner')
+  await page.getByRole('button', { name: /24 ساعة/ }).click()
+  await page.goto('./')
+  await expect(page.getByTestId(`timeline-${TODAY}`).getByRole('button', { name: /تطوير الميزة 14:00/ })).toBeVisible()
 })
 
 test('project workspace: create, add task, move on the board', async ({ page }) => {

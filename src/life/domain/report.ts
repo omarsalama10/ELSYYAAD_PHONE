@@ -229,7 +229,7 @@ export const PLAN_FILE_GUIDE = `## صيغة ملف الخطة المطلوب (JS
   "commitments": [{ "ref": "c1", "title": "", "kind": "work|class|appointment|sleep|meal|gym|prayer|other", "repeat": { "type": "weekly", "weekdays": [0,1,2,3,4] } | { "type": "daily" } | { "type": "once", "day": "" }, "start": "09:00", "end": "17:00", "validFrom": "", "validUntil": "" }],
   "habits": [{ "ref": "h1", "title": "", "schedule": { "type": "daily" } | { "type": "weekly", "weekdays": [] } | { "type": "timesPerWeek", "times": 3 } }],
   "notes": [{ "kind": "note|idea|decision|risk|issue", "title": "", "body": "", "project": "p1" }],
-  "settings": { "dayStart": "08:00", "dayEnd": "23:00", "bufferPct": 0.15, "defaultSessionMin": 90, "maxDeepMinPerDay": 300, "deepStart": "11:30", "deepEnd": "15:00", "restWeekdays": [5], "accountability": "calm|balanced|firm" }
+  "settings": { "dayStart": "08:00", "dayEnd": "23:00", "bufferPct": 0.15, "defaultSessionMin": 90, "maxDeepMinPerDay": 300, "deepStart": "11:30", "deepEnd": "15:00", "restWeekdays": [5], "accountability": "calm|balanced|firm", "clock": "12h|24h" }
 }
 
 قواعد مهمة:

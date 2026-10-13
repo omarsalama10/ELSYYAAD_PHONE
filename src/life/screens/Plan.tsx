@@ -3,12 +3,12 @@ import { useSearchParams } from 'react-router-dom'
 import { deleteCommitment, saveCommitment, toggleCommitmentSkip } from '../db/repo'
 import { buildICS } from '../domain/ics'
 import { whatIf, type Scenario, type WhatIfResult } from '../domain/scheduler'
-import { addDays, fmtMinutes, hhmm, minuteOfDay } from '../domain/time'
+import { addDays, fmtMinutes, minuteOfDay } from '../domain/time'
 import type { Commitment, CommitmentKind, DayKey, PlanBlock } from '../domain/types'
 import { useLife } from '../state'
 import { Button } from '../../ui/primitives'
 import { useSafe, useToast } from '../../ui/Toast'
-import { dayLabel, fmtWhen, fromTimeInput, KIND_LABEL, toTimeInput, WEEKDAY_NAMES, WEEKDAY_SHORT } from '../ui/format'
+import { dayLabel, fmtTime, fmtTimeRange, fmtWhen, fromTimeInput, KIND_LABEL, toTimeInput, WEEKDAY_NAMES, WEEKDAY_SHORT } from '../ui/format'
 import { LI } from '../ui/icons'
 import { Bar, Chip, deliverFile, Empty, Field, Header, IconBtn, Sheet, Tabs } from '../ui/kit'
 import { BlockSheet, PlanReviewSheet, usePlanActions } from '../ui/planActions'
@@ -84,7 +84,7 @@ function WeekView() {
                   return (
                     <li key={b.id}>
                       <button type="button" onClick={() => setBlock(b)} className="flex w-full items-center gap-2 rounded-xl px-1.5 py-1 text-right text-sm active:bg-white/60">
-                        <span className="ltr w-11 shrink-0 text-xs text-muted num">{hhmm(b.startMin)}</span>
+                        <span className="ltr w-14 shrink-0 text-xs text-muted num">{fmtTime(b.startMin)}</span>
                         <span className={`h-2 w-2 shrink-0 rounded-full ${b.kind === 'commitment' ? 'bg-ink/30' : st === 'done' ? 'bg-accent' : st === 'missed' ? 'bg-danger' : 'bg-accent2'}`} />
                         <span className={`flex-1 truncate ${st === 'done' ? 'text-muted line-through' : ''}`}>{b.title}{b.parts && b.parts > 1 ? ` (${b.part}/${b.parts})` : ''}</span>
                         <span className="shrink-0 text-[11px] text-muted">{fmtMinutes(b.endMin - b.startMin)}</span>
@@ -151,7 +151,7 @@ function Commitments() {
       <p className="px-1 text-xs leading-relaxed text-muted">الالتزامات الثابتة (شغل، محاضرات، مواعيد، جيم) بيتشال وقتها من السعة قبل أي جدولة، والمحرك عمره ما بيحركها. تقدر تلغي مرة واحدة من الجدول نفسه.</p>
       {list.length === 0 ? <Empty>مفيش التزامات لسه.</Empty> : list.map((c) => (
         <button key={c.id} type="button" className="glass flex w-full items-center gap-3 p-3.5 text-right" onClick={() => setEdit(c)}>
-          <span className="ltr w-24 shrink-0 text-sm font-semibold num">{hhmm(c.startMin)}–{hhmm(c.endMin)}</span>
+          <span className="ltr w-28 shrink-0 text-sm font-semibold num">{fmtTimeRange(c.startMin, c.endMin)}</span>
           <span className="min-w-0 flex-1">
             <span className="block truncate font-medium">{c.title}</span>
             <span className="block truncate text-xs text-muted">{KIND_LABEL[c.kind]} • {rep(c)}{c.validUntil ? ` • لحد ${c.validUntil}` : ''}</span>
@@ -312,7 +312,7 @@ function WhatIf() {
           occ.length === 0 ? <p className="text-sm text-muted">مفيش التزامات في أفق التخطيط.</p> : (
             <Field label="أي مرة؟">
               <select className="w-full" value={occId} onChange={(e) => setOccId(e.target.value)}>
-                {occ.map((b) => <option key={b.id} value={b.id}>{b.title} — {dayLabel(b.day, today)} {hhmm(b.startMin)}</option>)}
+                {occ.map((b) => <option key={b.id} value={b.id}>{b.title} — {dayLabel(b.day, today)} {fmtTime(b.startMin)}</option>)}
               </select>
             </Field>
           )

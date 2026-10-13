@@ -330,6 +330,8 @@ export interface LifeSettings {
   restWeekdays: number[]
   /** First day of the week for weekly views (6 = Saturday). */
   weekStartsOn: number
+  /** How times of day are shown in the app (data stays in minutes). */
+  clock: '12h' | '24h'
   /** Share of free time kept empty as contingency, 0..0.5. */
   bufferPct: number
   /** Gap left between consecutive planned task blocks. */
@@ -365,6 +367,7 @@ export const DEFAULT_SETTINGS: LifeSettings = {
   dayEndMin: 23 * 60,
   restWeekdays: [],
   weekStartsOn: 6,
+  clock: '12h',
   bufferPct: 0.15,
   gapMin: 10,
   defaultSessionMin: 90,

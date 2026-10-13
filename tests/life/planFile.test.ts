@@ -89,8 +89,9 @@ describe('plan file preview', () => {
   })
 
   it('patches settings with HH:mm times', () => {
-    const p = previewPlanFile({ schema: PLAN_SCHEMA, settings: { dayStart: '07:30', bufferPct: 0.2, restWeekdays: [5] } }, empty(), opt)
+    const p = previewPlanFile({ schema: PLAN_SCHEMA, settings: { dayStart: '07:30', bufferPct: 0.2, restWeekdays: [5], clock: '24h' } }, empty(), opt)
     expect(p.errors).toEqual([])
-    expect(p.changes[0]!.record).toMatchObject({ dayStartMin: 450, bufferPct: 0.2, restWeekdays: [5] })
+    expect(p.changes[0]!.record).toMatchObject({ dayStartMin: 450, bufferPct: 0.2, restWeekdays: [5], clock: '24h' })
+    expect(previewPlanFile({ schema: PLAN_SCHEMA, settings: { clock: '13h' } }, empty(), opt).errors.join()).toContain('clock')
   })
 })

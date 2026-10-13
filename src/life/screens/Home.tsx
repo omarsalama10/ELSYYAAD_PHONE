@@ -6,14 +6,14 @@ import { LOW_OUTPUT_LABEL } from '../domain/analytics'
 import { habitStats, isScheduled } from '../domain/habits'
 import { isOpen, remainingMinutes } from '../domain/priority'
 import { currentAndNext, diffPlans } from '../domain/scheduler'
-import { at, fmtMinutes, hhmm, minuteOfDay, startOfWeek, addDays } from '../domain/time'
+import { at, fmtMinutes, minuteOfDay, startOfWeek, addDays } from '../domain/time'
 import type { LowOutputReason, PlanBlock, Task } from '../domain/types'
 import { useLife } from '../state'
 import { useNow } from '../../lib/hooks'
 import { useSafe, useToast } from '../../ui/Toast'
 import { Button } from '../../ui/primitives'
 import { ProgressRing } from '../../ui/viz'
-import { fmtDayLong, fmtWhen, greeting } from '../ui/format'
+import { fmtDayLong, fmtTime, fmtTimeRange, fmtWhen, greeting } from '../ui/format'
 import { LI } from '../ui/icons'
 import { Bar, Chip, IconBtn, Section, Stat } from '../ui/kit'
 import { BlockSheet, PlanReviewSheet, usePlanActions } from '../ui/planActions'
@@ -116,7 +116,7 @@ export function Home() {
             <button type="button" className="flex w-full items-center gap-2 rounded-2xl bg-white/50 px-3 py-2 text-right text-sm" onClick={() => setBlock(next)}>
               <span className="text-muted">التالي</span>
               <span className="flex-1 truncate font-medium">{next.title}</span>
-              <span className="ltr text-xs text-muted num">{next.day === today ? hhmm(next.startMin) : fmtWhen(at(next.day, next.startMin), today)}</span>
+              <span className="ltr text-xs text-muted num">{next.day === today ? fmtTime(next.startMin) : fmtWhen(at(next.day, next.startMin), today)}</span>
             </button>
           )}
         </div>
@@ -189,7 +189,7 @@ export function Home() {
           <p className="glass p-4 text-sm text-muted">اليوم فاضي. أضف مهام أو التزامات ثابتة (شغل، محاضرات) من شاشة الخطة.</p>
         ) : (
           <DayTimeline day={today} blocks={blocks} stateOf={life.blockState} startMin={Math.min(s.dayStartMin, nowMin)} endMin={s.dayEndMin} now={now} isToday
-            onTap={setBlock} onMove={(b, m) => void safe(async () => { await actions.moveBlock(b, m); toast(`اتنقلت لـ ${hhmm(m)}`) })} />
+            onTap={setBlock} onMove={(b, m) => void safe(async () => { await actions.moveBlock(b, m); toast(`اتنقلت لـ ${fmtTime(m)}`) })} />
         )}
         <p className="px-1 text-[11px] text-muted">اسحب من علامة ✥ لنقل المهمة؛ النقل بيثبّتها في الوقت الجديد. الالتزامات 🔒 مش بتتحرك.</p>
       </Section>
@@ -252,7 +252,7 @@ function NowCard({ task, block, running }: { task?: Task; block?: PlanBlock; run
     <div className="space-y-3">
       <div>
         <h2 className="text-[1.45rem] font-bold leading-tight">{title}</h2>
-        {block && <p className="ltr text-right text-sm text-muted num">{hhmm(block.startMin)}–{hhmm(block.endMin)}{block.parts && block.parts > 1 ? ` · جلسة ${block.part}/${block.parts}` : ''}</p>}
+        {block && <p className="ltr text-right text-sm text-muted num">{fmtTimeRange(block.startMin, block.endMin)}{block.parts && block.parts > 1 ? ` · جلسة ${block.part}/${block.parts}` : ''}</p>}
         {running && log && <p className="text-sm font-semibold text-accent2 num">⏱ {fmtMinutes((tick - log.start) / 60_000)} في الجلسة دي</p>}
       </div>
       {task && (
@@ -281,7 +281,7 @@ function FocusView({ task, block, next, onExit }: { task?: Task; block?: PlanBlo
       <div className="glass space-y-4 p-6 text-center">
         {task ? <NowCard task={task} block={block} running={running} /> : <p className="text-lg">مفيش مهمة دلوقتي</p>}
       </div>
-      {next && <p className="text-center text-sm text-muted">بعدها: {next.title} ({hhmm(next.startMin)})</p>}
+      {next && <p className="text-center text-sm text-muted">بعدها: {next.title} ({fmtTime(next.startMin)})</p>}
       <Button variant="ghost" onClick={onExit}>اخرج من وضع التركيز</Button>
     </div>
   )

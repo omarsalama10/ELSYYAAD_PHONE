@@ -7,6 +7,7 @@ import { commitmentOccursOn } from './domain/recurrence'
 import { plan, type PlanResult } from './domain/scheduler'
 import { addDays, at, dayKey, minuteOfDay } from './domain/time'
 import type { DayKey, DayPlan, PlanBlock, Task } from './domain/types'
+import { setClockFormat } from './ui/format'
 
 /**
  * One live snapshot of Life OS data + the derived plan, shared by every screen so the
@@ -51,6 +52,7 @@ export function LifeProvider({ children }: { children: ReactNode }) {
   const now = useMinuteClock()
   const value = useMemo<LifeState | null>(() => {
     if (!data) return null
+    setClockFormat(data.settings.clock)
     const today = dayKey(now)
     const restDays = data.dayLogs.filter((d) => d.restDay).map((d) => d.day)
     const proposal = plan({ tasks: data.tasks, commitments: data.commitments, settings: data.settings, now, restDays })

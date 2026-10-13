@@ -5,7 +5,8 @@ import { applyPlanChanges, createSnapshot, loadAll, restoreSnapshot, uid } from 
 import { buildReport } from '../domain/analytics'
 import { previewPlanFile, type PlanChange, type PlanPreview } from '../domain/planFile'
 import { buildStateExport, claudePrompt, PLAN_FILE_GUIDE, stateMarkdown } from '../domain/report'
-import { addDays, hhmm } from '../domain/time'
+import { addDays } from '../domain/time'
+import { fmtDateTime, fmtTime } from '../ui/format'
 import { useLife } from '../state'
 import { Button } from '../../ui/primitives'
 import { useSafe, useToast } from '../../ui/Toast'
@@ -150,8 +151,8 @@ export function DataCenter() {
 
 function short(field: string, v: unknown): string {
   if (v === undefined || v === null) return '—'
-  if (field.endsWith('Min') && typeof v === 'number' && (field.startsWith('day') || field.startsWith('quiet') || field.startsWith('start') || field.startsWith('end'))) return hhmm(v)
-  if (field === 'dueAt' && typeof v === 'number') return new Date(v).toLocaleString('ar-EG-u-nu-latn', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+  if (field.endsWith('Min') && typeof v === 'number' && (field.startsWith('day') || field.startsWith('quiet') || field.startsWith('start') || field.startsWith('end'))) return fmtTime(v)
+  if (field === 'dueAt' && typeof v === 'number') return fmtDateTime(v)
   const s = typeof v === 'object' ? JSON.stringify(v) : String(v)
   return s.length > 40 ? `${s.slice(0, 40)}…` : s
 }

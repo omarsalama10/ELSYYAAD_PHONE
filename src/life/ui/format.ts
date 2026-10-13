@@ -1,7 +1,18 @@
-import { addDays, dayKey, diffDays, hhmm, minuteOfDay, parseDay } from '../domain/time'
+import { addDays, dayKey, diffDays, fmtClock, fmtClockRange, hhmm, minuteOfDay, parseDay, type ClockFormat } from '../domain/time'
 import type { CommitmentKind, DayKey, Energy, GoalKind, NoteKind, TaskStatus } from '../domain/types'
 
 const LOCALE = 'ar-EG-u-nu-latn'
+
+/**
+ * Display clock format. LifeProvider sets it from settings before rendering its children,
+ * so every formatter below follows the user's choice without threading it through props.
+ */
+let clock: ClockFormat = '12h'
+export const setClockFormat = (c: ClockFormat) => { clock = c }
+export const fmtTime = (min: number, compact = false) => fmtClock(min, clock, compact)
+export const fmtTimeRange = (from: number, to: number) => fmtClockRange(from, to, clock)
+/** Date + time for history lists ("13 أكتوبر، 6:30 م"). */
+export const fmtDateTime = (t: number) => new Date(t).toLocaleString(LOCALE, { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hourCycle: clock === '12h' ? 'h12' : 'h23' })
 
 export const WEEKDAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
 export const WEEKDAY_SHORT = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س']
@@ -20,7 +31,7 @@ export const fmtDayShort = (day: DayKey) => parseDay(day).toLocaleDateString(LOC
 /** "اليوم 14:00" / "بكرة" / "الخميس 5 نوفمبر 09:30". End-of-day deadlines omit the time. */
 export function fmtWhen(t: number, today: DayKey): string {
   const m = minuteOfDay(t)
-  const time = m >= 23 * 60 + 59 ? '' : ` ${hhmm(m)}`
+  const time = m >= 23 * 60 + 59 ? '' : ` ${fmtTime(m)}`
   return `${dayLabel(dayKey(t), today)}${time}`
 }
 

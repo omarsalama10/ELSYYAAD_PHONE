@@ -1,4 +1,4 @@
-import { at, dayKey, hhmm, minuteOfDay } from './time'
+import { at, dayKey, fmtClock, fmtClockRange, minuteOfDay } from './time'
 import type { AccountabilityLevel, Commitment, DayKey, LifeSettings, PlanBlock, ReminderKind, Task } from './types'
 import type { PlanResult } from './scheduler'
 
@@ -57,12 +57,12 @@ export function dayReminders(x: ReminderInput): Reminder[] {
     if (b.kind === 'commitment') {
       const c = x.commitments.find((c) => c.id === b.commitmentId)
       const lead = c?.remindBeforeMin ?? s.remindBeforeMin
-      add({ key: `commitment:${b.id}`, kind: 'commitment', at: at(x.day, b.startMin - lead), title: b.title, body: `يبدأ ${hhmm(b.startMin)} (بعد ${lead} دقيقة)` })
+      add({ key: `commitment:${b.id}`, kind: 'commitment', at: at(x.day, b.startMin - lead), title: b.title, body: `يبدأ ${fmtClock(b.startMin, s.clock)} (بعد ${lead} دقيقة)` })
       continue
     }
     const part = b.parts && b.parts > 1 ? ` (جلسة ${b.part}/${b.parts})` : ''
-    add({ key: `before:${b.id}`, kind: 'before_start', at: at(x.day, b.startMin - s.remindBeforeMin), title: `بعد ${s.remindBeforeMin} دقيقة: ${b.title}`, body: `${hhmm(b.startMin)}–${hhmm(b.endMin)}${part}`, taskId: b.taskId, requiresOpenTask: true })
-    add({ key: `start:${b.id}`, kind: 'start', at: at(x.day, b.startMin), title: `ابدأ الآن: ${b.title}`, body: `حتى ${hhmm(b.endMin)}${part}`, taskId: b.taskId, requiresOpenTask: true })
+    add({ key: `before:${b.id}`, kind: 'before_start', at: at(x.day, b.startMin - s.remindBeforeMin), title: `بعد ${s.remindBeforeMin} دقيقة: ${b.title}`, body: `${fmtClockRange(b.startMin, b.endMin, s.clock)}${part}`, taskId: b.taskId, requiresOpenTask: true })
+    add({ key: `start:${b.id}`, kind: 'start', at: at(x.day, b.startMin), title: `ابدأ الآن: ${b.title}`, body: `حتى ${fmtClock(b.endMin, s.clock)}${part}`, taskId: b.taskId, requiresOpenTask: true })
     add({ key: `followup:${b.id}`, kind: 'followup', at: at(x.day, b.endMin), title: `انتهى وقت: ${b.title}`, body: 'اكتملت؟ جزئيًا؟ ولا تتأجل؟', taskId: b.taskId, requiresOpenTask: true })
     add({ key: `overdue:${b.id}`, kind: 'overdue', at: at(x.day, b.endMin + 15), title: `متأخرة: ${b.title}`, body: 'الجلسة عدّت ولسه المهمة مفتوحة. حدّث حالتها أو أعد الجدولة.', taskId: b.taskId, requiresOpenTask: true })
   }
@@ -72,7 +72,7 @@ export function dayReminders(x: ReminderInput): Reminder[] {
   add({
     key: `morning:${x.day}`, kind: 'morning', at: at(x.day, s.morningSummaryMin), title: 'ملخص اليوم',
     body: taskBlocks.length
-      ? `${new Set(taskBlocks.map((b) => b.taskId)).size} مهام مخططة (${Math.round(plannedMin / 6) / 10} ساعة). أولها «${first!.title}» ${hhmm(first!.startMin)}.`
+      ? `${new Set(taskBlocks.map((b) => b.taskId)).size} مهام مخططة (${Math.round(plannedMin / 6) / 10} ساعة). أولها «${first!.title}» ${fmtClock(first!.startMin, s.clock)}.`
       : 'مفيش مهام مخططة النهارده. افتح التطبيق واعتمد خطة.',
   })
   add({ key: `evening:${x.day}`, kind: 'evening', at: at(x.day, s.eveningReviewMin), title: 'مراجعة المساء', body: 'إيه اللي خلص النهارده؟ وإيه اللي محتاج يتنقل لبكرة؟' })

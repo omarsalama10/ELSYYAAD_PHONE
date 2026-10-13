@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { approvePlan, finishTask, pauseTimer, postponeTask, startTimer, toggleCommitmentSkip, updateTask } from '../db/repo'
 import { isOpen, remainingMinutes } from '../domain/priority'
 import { diffPlans } from '../domain/scheduler'
-import { addDays, fmtMinutes, hhmm, minuteOfDay } from '../domain/time'
+import { addDays, fmtMinutes, minuteOfDay } from '../domain/time'
 import type { DayKey, PlanBlock, Task } from '../domain/types'
 import { useLife } from '../state'
 import { Button } from '../../ui/primitives'
 import { useSafe, useToast } from '../../ui/Toast'
-import { dayLabel, fmtWhen } from './format'
+import { dayLabel, fmtTime, fmtTimeRange, fmtWhen } from './format'
 import { LI } from './icons'
 import { Chip, Field, Sheet } from './kit'
 
@@ -75,7 +75,7 @@ export function BlockSheet({ block, onClose }: { block: PlanBlock | null; onClos
     const skipped = c?.skipDays.includes(block.day)
     return (
       <Sheet open onClose={close} title={block.title}>
-        <p className="text-sm text-muted">التزام ثابت • {dayLabel(block.day, life.today)} {hhmm(block.startMin)}–{hhmm(block.endMin)}. المخطط ميحركهوش أبدًا.</p>
+        <p className="text-sm text-muted">التزام ثابت • {dayLabel(block.day, life.today)} {fmtTimeRange(block.startMin, block.endMin)}. المخطط ميحركهوش أبدًا.</p>
         <Button variant="soft" className="w-full" onClick={() => void safe(async () => {
           await toggleCommitmentSkip(block.commitmentId!, block.day)
           toast(skipped ? 'الالتزام رجع' : 'اتلغى المرة دي — راجع الخطة البديلة من زر "إعادة الجدولة"')
@@ -90,7 +90,7 @@ export function BlockSheet({ block, onClose }: { block: PlanBlock | null; onClos
   return (
     <Sheet open onClose={close} title={t.title}>
       <div className="flex flex-wrap gap-1">
-        <Chip>{dayLabel(block.day, life.today)} {hhmm(block.startMin)}–{hhmm(block.endMin)}</Chip>
+        <Chip>{dayLabel(block.day, life.today)} {fmtTimeRange(block.startMin, block.endMin)}</Chip>
         {block.parts && block.parts > 1 && <Chip>جلسة {block.part}/{block.parts}</Chip>}
         <Chip>متبقي {fmtMinutes(remainingMinutes(t, life.data.settings))}</Chip>
         {t.dueAt !== undefined && <Chip tone="warn">موعد {fmtWhen(t.dueAt, life.today)}</Chip>}
@@ -135,7 +135,7 @@ export function PlanReviewSheet({ open, onClose, days }: { open: boolean; onClos
   const anyApproved = days.some((d) => life.approved.has(d))
   const changes = anyApproved ? diffPlans(before, after) : []
   const title = (id: string) => life.taskById.get(id)?.title ?? id
-  const where = (x?: { day: DayKey; startMin: number }) => (x ? `${dayLabel(x.day, life.today)} ${hhmm(x.startMin)}` : '')
+  const where = (x?: { day: DayKey; startMin: number }) => (x ? `${dayLabel(x.day, life.today)} ${fmtTime(x.startMin)}` : '')
   const { atRisk, unscheduled, overload } = life.proposal
   return (
     <Sheet open onClose={onClose} title={anyApproved ? 'مراجعة إعادة الجدولة' : 'اعتماد الخطة'} footer={

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
-import { hhmm, minuteOfDay } from '../domain/time'
+import { minuteOfDay } from '../domain/time'
+import { fmtTime, fmtTimeRange } from './format'
 import type { DayKey, PlanBlock } from '../domain/types'
 import type { BlockState } from '../state'
 import { LI } from './icons'
@@ -73,7 +74,7 @@ export function DayTimeline({ day, blocks, stateOf, startMin, endMin, now, isTod
       <div className="relative" style={{ height }}>
         {hours.map((h) => (
           <div key={h} className="absolute inset-x-0 flex items-start" style={{ top: (h - from) * PX }}>
-            <span className="ltr w-12 shrink-0 -translate-y-1/2 pr-2 text-left text-[10px] text-muted num">{h < 1440 ? hhmm(h) : ''}</span>
+            <span className="ltr w-12 shrink-0 -translate-y-1/2 pr-2 text-left text-[10px] text-muted num">{h < 1440 ? fmtTime(h, true) : ''}</span>
             <div className="h-px flex-1 bg-ink/[0.06]" />
           </div>
         ))}
@@ -98,7 +99,7 @@ export function DayTimeline({ day, blocks, stateOf, startMin, endMin, now, isTod
                 className={`absolute overflow-hidden rounded-2xl border px-2.5 py-1 text-right shadow-sm backdrop-blur ${STYLE[st]} ${drag?.id === b.id ? 'z-30 opacity-90 shadow-glass' : 'z-10'}`}
                 style={{ top, height: h, right: `${(l.lane / l.of) * 100}%`, width: `calc(${100 / l.of}% - 4px)` }}
               >
-                <button type="button" className="block h-full w-full text-right" onClick={() => onTap(b)} aria-label={`${b.title} ${hhmm(b.startMin)}`}>
+                <button type="button" className="block h-full w-full text-right" onClick={() => onTap(b)} aria-label={`${b.title} ${fmtTime(b.startMin)}`}>
                   <div className="flex items-center gap-1 text-[13px] font-semibold leading-tight">
                     {b.kind === 'commitment' && LI.lock('h-3 w-3 shrink-0')}
                     {b.kind === 'pinned' && LI.clock('h-3 w-3 shrink-0')}
@@ -106,7 +107,7 @@ export function DayTimeline({ day, blocks, stateOf, startMin, endMin, now, isTod
                   </div>
                   {h > 34 && (
                     <div className="ltr text-right text-[10.5px] text-muted num">
-                      {drag?.id === b.id ? hhmm(previewStart) : hhmm(b.startMin)}–{hhmm((drag?.id === b.id ? previewStart : b.startMin) + b.endMin - b.startMin)}
+                      {fmtTimeRange(drag?.id === b.id ? previewStart : b.startMin, (drag?.id === b.id ? previewStart : b.startMin) + b.endMin - b.startMin)}
                       {b.parts && b.parts > 1 ? ` · ${b.part}/${b.parts}` : ''}
                       {b.confidence === 'rough' ? ' · ~' : ''}
                     </div>

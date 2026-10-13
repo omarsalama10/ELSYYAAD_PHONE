@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { createTask, finishTask, updateTask } from '../db/repo'
 import { isOpen, openDependencies, priorityLabel } from '../domain/priority'
 import { matches, parseQuickAdd, suggestEstimate } from '../domain/text'
-import { at, fmtMinutes, hhmm } from '../domain/time'
+import { at, fmtMinutes } from '../domain/time'
 import type { Task } from '../domain/types'
 import { useLife } from '../state'
 import { useSafe, useToast } from '../../ui/Toast'
 import { Button } from '../../ui/primitives'
-import { dayLabel, dueTone, fmtWhen, NOTE_KIND_LABEL, STATUS_LABEL, STATUS_TONE } from './format'
+import { dayLabel, dueTone, fmtTime, fmtWhen, NOTE_KIND_LABEL, STATUS_LABEL, STATUS_TONE } from './format'
 import { LI } from './icons'
 import { Chip, Field, Sheet } from './kit'
 
@@ -57,7 +57,7 @@ export function TaskRow({ task, selected, onSelect, showProject = true }: { task
           {blocked && <Chip tone="warn">{LI.lock('h-3 w-3')} معطلة</Chip>}
           {showProject && project && <Chip><span className="h-2 w-2 rounded-full" style={{ background: project.color }} />{project.name}</Chip>}
           {task.dueAt !== undefined && !done && <Chip tone={dueTone(task.dueAt, now)}>{LI.flag('h-3 w-3')}{fmtWhen(task.dueAt, today)}</Chip>}
-          {task.pinned && !done && <Chip tone="accent">{LI.clock('h-3 w-3')}{dayLabel(task.pinned.day, today)} {hhmm(task.pinned.startMin)}</Chip>}
+          {task.pinned && !done && <Chip tone="accent">{LI.clock('h-3 w-3')}{dayLabel(task.pinned.day, today)} {fmtTime(task.pinned.startMin)}</Chip>}
           {task.estimateMin !== undefined && <Chip>{fmtMinutes(task.estimateMin)}{task.confidence === 'rough' ? '~' : ''}</Chip>}
           {task.progress > 0 && !done && <Chip tone="accent">{task.progress}%</Chip>}
           {pr && !done && pr.tone !== 'muted' && <Chip tone={pr.tone === 'accent' ? 'muted' : pr.tone}>{pr.label}</Chip>}
@@ -143,7 +143,7 @@ function QuickAddSheet({ defaults, onClose }: { defaults: Partial<Task>; onClose
         {parsed.importance !== undefined && <Chip tone="accent">أهمية {parsed.importance}</Chip>}
         {parsed.projectId && <Chip tone="accent">{projects.find((p) => p.id === parsed.projectId)?.name}</Chip>}
         {parsed.dueAt !== undefined && <Chip tone="accent">موعد {fmtWhen(parsed.dueAt, today)}</Chip>}
-        {parsed.pinned && <Chip tone="accent">مثبتة {hhmm(parsed.pinned.startMin)}</Chip>}
+        {parsed.pinned && <Chip tone="accent">مثبتة {fmtTime(parsed.pinned.startMin)}</Chip>}
         {suggestion && (
           <button type="button" className="chip text-accent" onClick={() => setEstimate(String(suggestion.minutes))}>
             اقتراح: {fmtMinutes(suggestion.minutes)} (من {suggestion.basis} مهام مشابهة)
@@ -187,7 +187,7 @@ export function SearchSheet({ open, onClose }: { open: boolean; onClose: () => v
     for (const g of data.goals) if (!g.deletedAt && matches(q, g.title, g.outcome)) out.push({ key: `g${g.id}`, label: g.title, sub: 'هدف', to: `/goals/${g.id}` })
     for (const t of data.tasks) if (!t.deletedAt && matches(q, t.title, t.description, t.notes, t.category, t.tags.join(' '))) out.push({ key: `t${t.id}`, label: t.title, sub: t.recurrence ? 'مهمة متكررة' : `مهمة • ${STATUS_LABEL[t.status]}`, to: `/tasks/${t.id}` })
     for (const n of data.notes) if (!n.deletedAt && matches(q, n.title, n.body, n.tags.join(' '))) out.push({ key: `n${n.id}`, label: n.title, sub: NOTE_KIND_LABEL[n.kind], to: `/notes?open=${n.id}` })
-    for (const c of data.commitments) if (!c.deletedAt && matches(q, c.title)) out.push({ key: `c${c.id}`, label: c.title, sub: `التزام ${hhmm(c.startMin)}`, to: '/plan?tab=commitments' })
+    for (const c of data.commitments) if (!c.deletedAt && matches(q, c.title)) out.push({ key: `c${c.id}`, label: c.title, sub: `التزام ${fmtTime(c.startMin)}`, to: '/plan?tab=commitments' })
     return out.slice(0, 40)
   }, [q, data])
   return (

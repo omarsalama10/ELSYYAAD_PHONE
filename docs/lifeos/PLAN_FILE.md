@@ -73,7 +73,7 @@ All keys are optional except `schema`.
 | commitments | title*, kind (work/class/appointment/sleep/meal/gym/prayer/other), repeat* ({type:once, day} / {type:weekly, weekdays} / {type:daily}), start*, end*, validFrom, validUntil, skipDays[], remindBeforeMin |
 | habits | title*, schedule ({type:daily} / {type:weekly, weekdays} / {type:timesPerWeek, times}), goal, archived |
 | notes | title*, kind (note/idea/decision/risk/issue), body, project, goal, task, day, tags[], severity 1–3, open |
-| settings | dayStart, dayEnd, quietStart, quietEnd, morningSummary, eveningReview, deepStart, deepEnd (HH:mm); bufferPct 0–0.5; gapMin; defaultSessionMin; maxDeepMinPerDay; planHorizonDays; remindBeforeMin; accountability (calm/balanced/firm); restWeekdays[] |
+| settings | dayStart, dayEnd, quietStart, quietEnd, morningSummary, eveningReview, deepStart, deepEnd (HH:mm); bufferPct 0–0.5; gapMin; defaultSessionMin; maxDeepMinPerDay; planHorizonDays; remindBeforeMin; accountability (calm/balanced/firm); clock (12h/24h — display only); restWeekdays[] |
 
 `*` required when creating.
 
