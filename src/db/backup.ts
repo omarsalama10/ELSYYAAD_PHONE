@@ -1,6 +1,6 @@
 import { strFromU8, strToU8, unzipSync, zipSync, type Zippable } from 'fflate'
-import { BACKUP_VERSION, validateBackup, type BackupData, type MediaMeta } from '../domain/backup'
-import type { Media } from '../domain/types'
+import { BACKUP_VERSION, validateBackup, type BackupData, type MediaMeta, type PhotoMeta } from '../domain/backup'
+import type { Media, ProgressPhoto } from '../domain/types'
 import { db } from './db'
 import { SETTING } from './repo'
 
@@ -13,6 +13,7 @@ export async function exportBackup(now = Date.now()): Promise<Uint8Array> {
     db.tape.toArray(), db.settings.toArray(), db.media.toArray(), db.checkins.toArray(),
     db.foods.toArray(), db.meals.toArray(), db.days.toArray(), db.weights.toArray(),
   ])
+  const photos = await db.photos.toArray()
   const files: Zippable = {}
   const mediaMeta: MediaMeta[] = []
   for (const m of media) {
@@ -20,7 +21,13 @@ export async function exportBackup(now = Date.now()): Promise<Uint8Array> {
     files[file] = [new Uint8Array(await m.blob.arrayBuffer()), { level: 0 }]
     mediaMeta.push({ id: m.id, exerciseId: m.exerciseId, mime: m.mime, createdAt: m.createdAt, file })
   }
-  const data: BackupData = { version: BACKUP_VERSION, exportedAt: now, programs, sessions, sets, inbody, tape, settings, media: mediaMeta, checkins, foods, meals, days, weights }
+  const photoMeta: PhotoMeta[] = []
+  for (const p of photos) {
+    const file = `photos/${p.id}`
+    files[file] = [new Uint8Array(await p.blob.arrayBuffer()), { level: 0 }]
+    photoMeta.push({ id: p.id, date: p.date, pose: p.pose, mime: p.mime, at: p.at, file })
+  }
+  const data: BackupData = { version: BACKUP_VERSION, exportedAt: now, programs, sessions, sets, inbody, tape, settings, media: mediaMeta, checkins, foods, meals, days, weights, photos: photoMeta }
   files[DATA_FILE] = strToU8(JSON.stringify(data))
   const zip = zipSync(files)
   await db.settings.put({ key: SETTING.lastBackupAt, value: now })
@@ -50,7 +57,13 @@ export async function importBackup(bytes: Uint8Array): Promise<BackupData> {
     return { id: m.id, exerciseId: m.exerciseId, mime: m.mime, createdAt: m.createdAt, blob: new Blob([blob], { type: m.mime }) }
   })
 
-  const tables = [db.programs, db.sessions, db.sets, db.inbody, db.tape, db.settings, db.media, db.checkins, db.foods, db.meals, db.days, db.weights]
+  const photos: ProgressPhoto[] = data.photos.map((p) => {
+    const bytes = files[p.file]
+    if (!bytes) throw new Error(`صورة ناقصة في النسخة: ${p.file}`)
+    return { id: p.id, date: p.date, pose: p.pose, mime: p.mime, at: p.at, blob: new Blob([bytes], { type: p.mime }) }
+  })
+
+  const tables = [db.photos, db.programs, db.sessions, db.sets, db.inbody, db.tape, db.settings, db.media, db.checkins, db.foods, db.meals, db.days, db.weights]
   await db.transaction('rw', tables, async () => {
     await Promise.all(tables.map((t) => t.clear()))
     await db.programs.bulkAdd(data.programs)
@@ -65,6 +78,7 @@ export async function importBackup(bytes: Uint8Array): Promise<BackupData> {
     await db.meals.bulkAdd(data.meals)
     await db.days.bulkAdd(data.days)
     await db.weights.bulkAdd(data.weights)
+    await db.photos.bulkAdd(photos)
   })
   return data
 }

@@ -1,4 +1,4 @@
-import type { CheckIn, InBody, Media, Program, Session, SetLog, Tape } from '../domain/types'
+import type { BodyGoals, CheckIn, InBody, Media, Pose, ProgressPhoto, Program, Session, SetLog, Tape } from '../domain/types'
 import { NAME_OVERRIDES } from './seed'
 import { db } from './db'
 
@@ -160,3 +160,19 @@ export async function renameExercise(id: string, nameAr: string): Promise<void> 
     await db.exercises.update(id, { nameAr: name })
   })
 }
+
+// ---- progress photos & body goals ----
+
+export async function addPhoto(date: string, pose: Pose, blob: Blob): Promise<ProgressPhoto> {
+  const p: ProgressPhoto = { id: uid(), date, pose, blob, mime: blob.type || 'image/jpeg', at: Date.now() }
+  await db.photos.add(p)
+  return p
+}
+export const listPhotos = () => db.photos.orderBy('date').toArray()
+export const deletePhoto = (id: string) => db.photos.delete(id)
+
+const BODY_GOALS = 'bodyGoals'
+export async function getBodyGoals(): Promise<BodyGoals> {
+  return ((await db.settings.get(BODY_GOALS))?.value as BodyGoals | undefined) ?? {}
+}
+export const saveBodyGoals = (g: BodyGoals) => db.settings.put({ key: BODY_GOALS, value: g })

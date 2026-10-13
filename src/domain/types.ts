@@ -105,7 +105,7 @@ export interface InBody {
 }
 
 export const TAPE_FIELDS = [
-  'neck', 'chest', 'waist', 'hips',
+  'neck', 'shoulders', 'chest', 'waist', 'hips',
   'armL', 'armR', 'forearmL', 'forearmR',
   'thighL', 'thighR', 'calfL', 'calfR',
 ] as const
@@ -140,3 +140,18 @@ export interface CheckIn {
   painNote?: string
   at: number
 }
+
+export type Pose = 'front' | 'side' | 'back'
+
+export interface ProgressPhoto {
+  id: string
+  /** YYYY-MM-DD */
+  date: string
+  pose: Pose
+  blob: Blob
+  mime: string
+  at: number
+}
+
+/** Optional targets the body screen projects toward. */
+export interface BodyGoals { weight?: number; pbf?: number; waist?: number }

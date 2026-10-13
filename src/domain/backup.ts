@@ -1,8 +1,8 @@
-import type { CheckIn, InBody, Program, Session, SetLog, Setting, Tape } from './types'
+import type { CheckIn, InBody, Pose, Program, Session, SetLog, Setting, Tape } from './types'
 import type { DayLog, Food, MealEntry, WeightLog } from './nutrition/types'
 
-export const BACKUP_VERSION = 3
-const SUPPORTED = [1, 2, 3]
+export const BACKUP_VERSION = 4
+const SUPPORTED = [1, 2, 3, 4]
 
 export interface MediaMeta {
   id: string
@@ -28,11 +28,14 @@ export interface BackupData {
   meals: MealEntry[]
   days: DayLog[]
   weights: WeightLog[]
+  photos: PhotoMeta[]
 }
 
-const TABLES = ['programs', 'sessions', 'sets', 'inbody', 'tape', 'settings', 'media', 'checkins', 'foods', 'meals', 'days', 'weights'] as const
+export interface PhotoMeta { id: string; date: string; pose: Pose; mime: string; at: number; file: string }
+
+const TABLES = ['programs', 'sessions', 'sets', 'inbody', 'tape', 'settings', 'media', 'checkins', 'foods', 'meals', 'days', 'weights', 'photos'] as const
 /** Tables added after v1, defaulted to empty when importing an older backup. */
-const LATER: Record<string, number> = { checkins: 2, foods: 3, meals: 3, days: 3, weights: 3 }
+const LATER: Record<string, number> = { checkins: 2, foods: 3, meals: 3, days: 3, weights: 3, photos: 4 }
 
 /** Shape check before any destructive import; throws a user-facing Arabic message. */
 export function validateBackup(x: unknown): BackupData {
