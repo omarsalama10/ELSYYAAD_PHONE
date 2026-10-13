@@ -170,3 +170,42 @@ test('a missed session offers a re-plan with a diff, and approving clears it', a
   await expect(page.getByTestId('replan')).toHaveCount(0)
   await expect(page.getByTestId(`timeline-${TODAY}`).getByRole('button', { name: /مراجعة العقد 11:00/ })).toBeVisible()
 })
+
+test('follow-ups due while the app was closed land in the inbox and can be answered', async ({ page }) => {
+  await page.goto('./')
+  await quickAdd(page, 'تسليم التصميم 30د')
+  await page.getByText('خطة اليوم مقترحة').click()
+  await page.getByRole('button', { name: /اعتمد خطة/ }).click()
+
+  await page.clock.setFixedTime(new Date(2026, 9, 12, 11, 0, 0))
+  await page.reload()
+  await page.getByRole('link', { name: 'التنبيهات' }).click()
+  const card = page.locator('.glass').filter({ hasText: 'انتهى وقت: تسليم التصميم' })
+  await expect(card).toBeVisible()
+  await card.getByRole('button', { name: 'اكتملت' }).click()
+  await expect(page.getByText('مفيش حاجة مستنية رد.')).toBeVisible()
+  await page.getByRole('tab', { name: 'السجل' }).click()
+  await expect(page.getByText('اتعالج').first()).toBeVisible()
+})
+
+test('zip backup restores Life OS data after a full wipe; ICS export downloads', async ({ page }) => {
+  await page.goto('./')
+  await quickAdd(page, 'مهمة في النسخة 45د')
+
+  await page.goto('./#/plan')
+  const [ics] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'تصدير للتقويم' }).click()])
+  expect(ics.suggestedFilename()).toBe(`elsyyaad-plan-${TODAY}.ics`)
+
+  await page.goto('./#/settings')
+  const [zip] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'اعمل نسخة' }).click()])
+  const path = await zip.path()
+  await Promise.all([page.waitForEvent('load'), page.getByRole('button', { name: 'امسح كل الداتا' }).click()])
+  await page.goto('./#/tasks')
+  await expect(page.getByTestId('task-row')).toHaveCount(0)
+
+  await page.goto('./#/settings')
+  await page.locator('input[type=file]').setInputFiles(path)
+  await expect(page.getByRole('status').filter({ hasText: '1 مهمة' })).toBeVisible()
+  await page.goto('./#/tasks')
+  await expect(page.getByTestId('task-row').filter({ hasText: 'مهمة في النسخة' })).toBeVisible()
+})
