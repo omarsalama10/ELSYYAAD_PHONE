@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('backup export → wipe → import restores data', async ({ page }) => {
-  await page.goto('./#/body')
+  await page.goto('./#/body?tab=inbody')
   await page.getByRole('button', { name: '+ قياس جديد' }).click()
   await page.getByLabel('الوزن', { exact: true }).fill('70.5')
   await page.getByRole('button', { name: 'حفظ' }).click()
@@ -19,7 +19,7 @@ test('backup export → wipe → import restores data', async ({ page }) => {
   await expect(page.getByText('لسه معملتش')).toHaveCount(0)
 
   await Promise.all([page.waitForEvent('load'), page.getByRole('button', { name: 'امسح كل الداتا' }).click()])
-  await page.goto('./#/body')
+  await page.goto('./#/body?tab=inbody')
   await expect(page.getByText('سجّل أول قياس InBody')).toBeVisible()
 
   await page.goto('./#/settings')

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useSearchParams } from 'react-router-dom'
 import { Segmented } from '../ui/viz'
+import { BodyOverview } from './body/Overview'
+import { BodyPhotos } from './body/Photos'
 import { deleteInBody, deleteTape, listInBody, listTape, saveInBody, saveTape, uid } from '../db/repo'
 import { asymmetryPct, type Point } from '../domain/stats'
 import type { InBody, Segments, Tape, TapeField } from '../domain/types'
@@ -10,7 +12,7 @@ import { LineChart, type Series } from '../ui/LineChart'
 import { Button, Card, Empty, NumberInput, PageTitle } from '../ui/primitives'
 import { useSafe } from '../ui/Toast'
 
-type Tab = 'inbody' | 'tape'
+type Tab = 'overview' | 'inbody' | 'tape' | 'photos'
 
 const IB_MAIN: { key: keyof InBody; label: string; unit: string }[] = [
   { key: 'weight', label: 'الوزن', unit: 'كجم' },
@@ -31,7 +33,7 @@ const SEGMENTS: { key: keyof Segments; label: string }[] = [
   { key: 'rl', label: 'رجل يمين' }, { key: 'll', label: 'رجل شمال' },
 ]
 const TAPE: { key: TapeField; label: string }[] = [
-  { key: 'neck', label: 'الرقبة' }, { key: 'chest', label: 'الصدر' }, { key: 'waist', label: 'الوسط (عند السرة)' }, { key: 'hips', label: 'الحوض' },
+  { key: 'neck', label: 'الرقبة' }, { key: 'shoulders', label: 'الكتف (المحيط)' }, { key: 'chest', label: 'الصدر' }, { key: 'waist', label: 'الوسط (عند السرة)' }, { key: 'hips', label: 'الحوض' },
   { key: 'armR', label: 'دراع يمين' }, { key: 'armL', label: 'دراع شمال' }, { key: 'forearmR', label: 'ساعد يمين' }, { key: 'forearmL', label: 'ساعد شمال' },
   { key: 'thighR', label: 'فخد يمين' }, { key: 'thighL', label: 'فخد شمال' }, { key: 'calfR', label: 'سمانة يمين' }, { key: 'calfL', label: 'سمانة شمال' },
 ]
@@ -155,7 +157,8 @@ function Asym({ label, l, r }: { label: string; l?: number; r?: number }) {
 export function BodyScreen() {
   const safe = useSafe()
   const [params] = useSearchParams()
-  const [tab, setTab] = useState<Tab>(params.get('tab') === 'tape' ? 'tape' : 'inbody')
+  const initialTab = (['inbody', 'tape', 'photos'] as const).find((x) => x === params.get('tab')) ?? (params.get('new') ? 'inbody' : 'overview')
+  const [tab, setTab] = useState<Tab>(initialTab)
   const [editing, setEditing] = useState<InBody | Tape | 'new' | undefined>(params.get('new') ? 'new' : undefined)
   const inbody = useLiveQuery(() => listInBody(), [])
   const tape = useLiveQuery(() => listTape(), [])
@@ -168,8 +171,10 @@ export function BodyScreen() {
 
   return (
     <div className="space-y-4">
-      <PageTitle action={!editing && <Button className="px-3 py-2 text-sm" onClick={() => setEditing('new')}>+ قياس جديد</Button>}>الجسم</PageTitle>
-      <Segmented<Tab> options={[{ value: 'inbody', label: 'InBody' }, { value: 'tape', label: 'مقاسات بالشريط' }]} value={tab} onChange={switchTab} />
+      <PageTitle action={!editing && (tab === 'inbody' || tab === 'tape') && <Button className="px-3 py-2 text-sm" onClick={() => setEditing('new')}>+ قياس جديد</Button>}>الجسم</PageTitle>
+      <Segmented<Tab> options={[{ value: 'overview', label: 'نظرة عامة' }, { value: 'inbody', label: 'InBody' }, { value: 'tape', label: 'مقاسات' }, { value: 'photos', label: 'صور' }]} value={tab} onChange={switchTab} />
+      {tab === 'overview' && <BodyOverview />}
+      {tab === 'photos' && <BodyPhotos />}
 
       {editing && tab === 'inbody' && <InBodyForm initial={editing === 'new' ? undefined : (editing as InBody)} onDone={() => setEditing(undefined)} />}
       {editing && tab === 'tape' && <TapeForm initial={editing === 'new' ? undefined : (editing as Tape)} onDone={() => setEditing(undefined)} />}

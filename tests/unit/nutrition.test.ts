@@ -34,9 +34,13 @@ describe('adaptive TDEE', () => {
     const d = new Date(2026, 8, 20 + i)
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   })
-  it('smooths weights with an EMA', () => {
-    const t = emaTrend([{ id: 'a', kg: 70, at: 0 }, { id: 'b', kg: 72, at: 1 }])
+  it('smooths daily weights with an EMA', () => {
+    const t = emaTrend([{ id: '2026-10-01', kg: 70, at: 0 }, { id: '2026-10-02', kg: 72, at: 1 }])
     expect(t[1]!.trend).toBeCloseTo(70.3, 1)
+  })
+  it('compounds the factor over gaps so sparse readings do not lag', () => {
+    const t = emaTrend([{ id: '2026-09-01', kg: 70, at: 0 }, { id: '2026-09-15', kg: 72, at: 1 }])
+    expect(t[1]!.trend).toBeGreaterThan(71.7)
   })
   it('falls back to the formula without enough data', () => {
     const r = estimateTdee({ intakes: [], weights: [], formulaTdee: 2300, today: '2026-10-13' })

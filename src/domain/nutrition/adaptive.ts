@@ -10,12 +10,22 @@ const DAY = 86_400_000
 
 const t = (iso: string) => new Date(`${iso}T12:00:00`).getTime()
 
-/** Exponential moving average over weigh-ins (sorted by date id). */
+/**
+ * Time-aware exponential moving average over weigh-ins (sorted by date id): a daily smoothing
+ * factor of 0.15, compounded over the gap, so sparse readings (e.g. biweekly InBody) don't lag.
+ */
 export function emaTrend(weights: WeightLog[]): { id: string; kg: number; trend: number }[] {
   const sorted = [...weights].sort((a, b) => a.id.localeCompare(b.id))
   let trend: number | undefined
+  let prev: string | undefined
   return sorted.map((w) => {
-    trend = trend === undefined ? w.kg : trend + ALPHA * (w.kg - trend)
+    if (trend === undefined || prev === undefined) trend = w.kg
+    else {
+      const gapDays = Math.max(1, Math.round((t(w.id) - t(prev)) / DAY))
+      const alpha = 1 - (1 - ALPHA) ** gapDays
+      trend += alpha * (w.kg - trend)
+    }
+    prev = w.id
     return { id: w.id, kg: w.kg, trend: Number(trend.toFixed(2)) }
   })
 }
