@@ -136,8 +136,10 @@ test('goals, habits, focus mode, insights and trash', async ({ page }) => {
   await page.getByRole('link', { name: 'المهام' }).click()
   await page.getByTestId('task-row').filter({ hasText: 'مهمة للحذف' }).click()
   await page.getByRole('button', { name: 'حذف', exact: true }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'اتنقلت لسلة المحذوفات' })).toBeVisible()
   await page.goto('./#/trash')
   await page.getByRole('button', { name: 'استرجاع' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'اترجع' })).toBeVisible()
   await page.goto('./#/tasks')
   await expect(page.getByTestId('task-row').filter({ hasText: 'مهمة للحذف' })).toBeVisible()
 
@@ -159,6 +161,7 @@ test('a missed session offers a re-plan with a diff, and approving clears it', a
   await quickAdd(page, 'مراجعة العقد 30د')
   await page.getByText('خطة اليوم مقترحة').click()
   await page.getByRole('button', { name: /اعتمد خطة/ }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'الخطة اتعتمدت' })).toBeVisible()
 
   // 11:00 — the 10:00 session ended and the task is still open.
   await page.clock.setFixedTime(new Date(2026, 9, 12, 11, 0, 0))
@@ -176,6 +179,7 @@ test('follow-ups due while the app was closed land in the inbox and can be answe
   await quickAdd(page, 'تسليم التصميم 30د')
   await page.getByText('خطة اليوم مقترحة').click()
   await page.getByRole('button', { name: /اعتمد خطة/ }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'الخطة اتعتمدت' })).toBeVisible()
 
   await page.clock.setFixedTime(new Date(2026, 9, 12, 11, 0, 0))
   await page.reload()
