@@ -66,3 +66,13 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
 .pb-safe { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
 .ltr { direction: ltr; unicode-bidi: isolate; }
 .num { font-variant-numeric: tabular-nums; }
+
+/* Printable report: white page, no chrome, cards as simple boxes. */
+@media print {
+  body::before { display: none; }
+  body { background: #fff !important; }
+  nav, .no-print, [role='status'] { display: none !important; }
+  .print-only { display: block !important; }
+  .glass, .glass-strong { background: #fff !important; box-shadow: none !important; border: 1px solid #d6e3de !important; backdrop-filter: none !important; break-inside: avoid; }
+  main { padding-bottom: 0 !important; }
+}
